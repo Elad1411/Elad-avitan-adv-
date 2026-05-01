@@ -1,4 +1,4 @@
-const Database = require('better-sqlite3')
+const { DatabaseSync } = require('node:sqlite')
 const bcrypt = require('bcryptjs')
 const fs = require('fs')
 const path = require('path')
@@ -21,9 +21,9 @@ if (!fs.existsSync('.env.local')) {
   console.log('Created .env.local with secure NEXTAUTH_SECRET')
 }
 
-const db = new Database(DB_PATH)
-db.pragma('journal_mode = WAL')
-db.pragma('foreign_keys = ON')
+const db = new DatabaseSync(DB_PATH)
+db.exec('PRAGMA journal_mode = WAL')
+db.exec('PRAGMA foreign_keys = ON')
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
@@ -85,7 +85,7 @@ if (!adminExists) {
   console.log('\n✓ Admin user created:')
   console.log('  Username: admin')
   console.log('  Password: admin123')
-  console.log('  ⚠️  Change this password immediately after first login!\n')
+  console.log('  ⚠️  Change this password after first login!\n')
 } else {
   console.log('Admin user already exists')
 }
