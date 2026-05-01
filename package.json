@@ -9,12 +9,12 @@
     "setup": "node scripts/setup-db.js"
   },
   "dependencies": {
-    "next": "14.2.5",
-    "react": "^18",
-    "react-dom": "^18",
-    "next-auth": "^4.24.7",
-    "better-sqlite3": "^9.6.0",
-    "bcryptjs": "^2.4.3"
+    "next": "^15.3.2",
+    "react": "^19",
+    "react-dom": "^19",
+    "next-auth": "^4.24.11",
+    "better-sqlite3": "^11.9.1",
+    "bcryptjs": "^3.0.2"
   },
   "devDependencies": {
     "tailwindcss": "^3.4.4",
