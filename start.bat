@@ -24,21 +24,18 @@ echo  [OK] Node.js %NODE_VER% found
 :: ---- Clean broken node_modules ----
 if exist "node_modules\" (
     if not exist "node_modules\.bin\next.cmd" (
-        echo  [FIX] Broken node_modules detected - removing...
+        echo  [FIX] Broken node_modules - removing...
         rmdir /s /q node_modules
         if exist "package-lock.json" del /f /q package-lock.json
-        echo  [OK] Cleaned
     ) else (
         echo  [OK] node_modules OK
     )
-) else (
-    echo  [INFO] node_modules not found - will install
 )
 
 :: ---- Install dependencies ----
 if not exist "node_modules\" (
     echo.
-    echo  [1/3] Installing dependencies (npm install)...
+    echo  [1/3] Installing dependencies...
     echo        Please wait, may take a few minutes...
     echo.
     npm install
@@ -73,7 +70,7 @@ if not exist ".env.local" (
 :: ---- Clean broken build ----
 if exist ".next\" (
     if not exist ".next\BUILD_ID" (
-        echo  [FIX] Broken .next folder - removing...
+        echo  [FIX] Broken build folder - removing...
         rmdir /s /q .next
     )
 )
@@ -81,28 +78,29 @@ if exist ".next\" (
 :: ---- Build ----
 if not exist ".next\" (
     echo.
-    echo  [3/3] Building website (npm run build)...
+    echo  [3/3] Building website...
     echo        Please wait, may take 2-5 minutes...
     echo.
     call npm run build
     if errorlevel 1 (
         echo.
-        echo  [ERROR] Build failed. Retrying once...
-        rmdir /s /q .next 2>nul
-        call npm run build
-        if errorlevel 1 (
-            echo  [ERROR] Build failed again. Check errors above.
-            pause
-            exit /b 1
-        )
+        echo  [ERROR] Build failed. Check errors above.
+        pause
+        exit /b 1
     )
-    echo  [OK] Website built successfully
+    echo  [OK] Website built
 ) else (
     echo  [OK] Build exists
 )
 
-:: ---- Get local IP ----
-for /f %%i in ('powershell -NoProfile -Command "(Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notlike '127.*' -and $_.IPAddress -notlike '169.*' } | Select-Object -First 1).IPAddress"') do set LOCAL_IP=%%i
+:: ---- Get local IP using ipconfig ----
+set LOCAL_IP=
+for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /i "IPv4"') do (
+    set RAW=%%a
+    set RAW=%RAW: =%
+    if not defined LOCAL_IP set LOCAL_IP=%RAW%
+)
+if not defined LOCAL_IP set LOCAL_IP=YOUR-PC-IP
 
 echo.
 echo  ============================================================
