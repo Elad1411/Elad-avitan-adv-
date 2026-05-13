@@ -1,226 +1,126 @@
 @echo off
 chcp 65001 >nul
-title עו"ד אלעד אביטן - הפעלת האתר
-color 0A
 
 echo.
 echo  ============================================================
-echo    משרד עורכי הדין אלעד אביטן - הפעלת האתר
-echo    גרסה 2.0 - בדיקה עצמית ותיקון אוטומטי
+echo    Elad Avitan Law - Starting Website
 echo  ============================================================
 echo.
 
-:: ================================================================
-::  STEP 0 - בדיקת Node.js
-:: ================================================================
+:: ---- Check Node.js ----
 node --version >nul 2>&1
 if errorlevel 1 (
-    color 0C
-    echo  [שגיאה] Node.js לא מותקן!
+    echo  [ERROR] Node.js is not installed!
     echo.
-    echo  הורד והתקן מ: https://nodejs.org
-    echo  בחר את הכפתור הירוק LTS והתחל מחדש.
+    echo  Download from: https://nodejs.org
+    echo  Choose the green LTS button and restart.
     echo.
     pause
     exit /b 1
 )
 for /f %%v in ('node --version') do set NODE_VER=%%v
-echo  [OK] Node.js %NODE_VER% זוהה
+echo  [OK] Node.js %NODE_VER% found
 
-:: בדיקת גרסה מינימלית (22+)
-for /f "tokens=1 delims=." %%a in ('node --version') do set MAJOR_VER=%%a
-set MAJOR_VER=%MAJOR_VER:v=%
-if %MAJOR_VER% LSS 18 (
-    color 0C
-    echo.
-    echo  [שגיאה] Node.js %NODE_VER% ישן מדי. נדרש גרסה 22 ומעלה.
-    echo  הורד מ: https://nodejs.org
-    echo.
-    pause
-    exit /b 1
-)
-
-:: ================================================================
-::  STEP 1 - ניקוי גרסאות שבורות
-:: ================================================================
-echo.
-echo  [בדיקה] בודק תקינות node_modules...
-
-:: בדוק אם next קיים ועובד
-if exist "node_modules\.bin\next.cmd" (
-    node node_modules\.bin\next --version >nul 2>&1
-    if errorlevel 1 (
-        echo  [ניקוי] node_modules שבור - מוחק ומתקין מחדש...
-        rmdir /s /q node_modules 2>nul
-        if exist "package-lock.json" del /f /q package-lock.json 2>nul
+:: ---- Clean broken node_modules ----
+if exist "node_modules\" (
+    if not exist "node_modules\.bin\next.cmd" (
+        echo  [FIX] Broken node_modules detected - removing...
+        rmdir /s /q node_modules
+        if exist "package-lock.json" del /f /q package-lock.json
+        echo  [OK] Cleaned
     ) else (
-        echo  [OK] node_modules תקין
+        echo  [OK] node_modules OK
     )
 ) else (
-    if exist "node_modules" (
-        echo  [ניקוי] node_modules חסר קבצי Next.js - מוחק...
-        rmdir /s /q node_modules 2>nul
-        if exist "package-lock.json" del /f /q package-lock.json 2>nul
-    )
+    echo  [INFO] node_modules not found - will install
 )
 
-:: ================================================================
-::  STEP 2 - התקנת תלויות
-:: ================================================================
+:: ---- Install dependencies ----
 if not exist "node_modules\" (
     echo.
-    echo  [1/4] מתקין תלויות ^(npm install^)...
-    echo        אנא המתן, עשוי לקחת מספר דקות...
+    echo  [1/3] Installing dependencies (npm install)...
+    echo        Please wait, may take a few minutes...
     echo.
     npm install
     if errorlevel 1 (
-        color 0C
         echo.
-        echo  [שגיאה] ההתקנה נכשלה. נסה שוב.
+        echo  [ERROR] npm install failed. See errors above.
         pause
         exit /b 1
     )
-    echo  [OK] התלויות הותקנו בהצלחה
-) else (
-    echo  [OK] תלויות קיימות ותקינות
+    echo  [OK] Dependencies installed
 )
 
-:: ================================================================
-::  STEP 3 - הגדרת מסד נתונים
-:: ================================================================
+:: ---- Setup database ----
 if not exist ".env.local" (
     echo.
-    echo  [2/4] מגדיר מסד נתונים ראשוני...
+    echo  [2/3] Setting up database...
     node scripts/setup-db.js
     if errorlevel 1 (
-        color 0C
-        echo  [שגיאה] הגדרת מסד הנתונים נכשלה.
+        echo  [ERROR] Database setup failed.
         pause
         exit /b 1
     )
-    echo  [OK] מסד הנתונים הוגדר
+    echo  [OK] Database ready
 ) else (
-    echo  [OK] מסד נתונים קיים
-    :: בדוק שקובץ הDB קיים, אם לא - הרץ שוב
+    echo  [OK] Database exists
     if not exist "data\law.db" (
-        echo  [תיקון] קובץ DB חסר - מריץ הגדרה מחדש...
+        echo  [FIX] DB file missing - repairing...
         node scripts/setup-db.js
     )
 )
 
-:: ================================================================
-::  STEP 4 - בדיקת עצמית (Self-Audit)
-:: ================================================================
-echo.
-echo  [3/4] בדיקה עצמית של קבצי הפרויקט...
-set AUDIT_FAIL=0
-
-call :CHECK_FILE "app\page.js"             "דף ראשי"
-call :CHECK_FILE "app\layout.js"           "Layout"
-call :CHECK_FILE "app\globals.css"         "עיצוב"
-call :CHECK_FILE "middleware.js"           "Middleware"
-call :CHECK_FILE "lib\db.js"              "מסד נתונים"
-call :CHECK_FILE "app\api\auth\[...nextauth]\route.js"  "Auth API"
-call :CHECK_FILE "scripts\setup-db.js"    "Setup script"
-call :CHECK_FILE ".env.local"             "הגדרות סביבה"
-
-if %AUDIT_FAIL%==1 (
-    color 0C
-    echo.
-    echo  [שגיאה] קבצים חסרים - הפרויקט לא שלם.
-    echo  נסה: git pull
-    echo.
-    pause
-    exit /b 1
-)
-echo  [OK] כל קבצי הפרויקט תקינים
-
-:: ================================================================
-::  STEP 5 - בנייה (מנקה ובונה מחדש אם שבורה)
-:: ================================================================
-
-:: בדוק אם .next שבור
+:: ---- Clean broken build ----
 if exist ".next\" (
     if not exist ".next\BUILD_ID" (
-        echo  [ניקוי] תיקיית .next שבורה - מוחק ובונה מחדש...
-        rmdir /s /q .next 2>nul
+        echo  [FIX] Broken .next folder - removing...
+        rmdir /s /q .next
     )
 )
 
+:: ---- Build ----
 if not exist ".next\" (
     echo.
-    echo  [4/4] בונה את האתר ^(npm run build^)...
-    echo        אנא המתן, עשוי לקחת 2-5 דקות...
+    echo  [3/3] Building website (npm run build)...
+    echo        Please wait, may take 2-5 minutes...
     echo.
     call npm run build
     if errorlevel 1 (
-        color 0C
         echo.
-        echo  [שגיאה] הבנייה נכשלה. מנקה ומנסה שנית...
+        echo  [ERROR] Build failed. Retrying once...
         rmdir /s /q .next 2>nul
         call npm run build
         if errorlevel 1 (
-            color 0C
-            echo  [שגיאה] הבנייה נכשלה שוב. בדוק שגיאות מעל.
+            echo  [ERROR] Build failed again. Check errors above.
             pause
             exit /b 1
         )
     )
-    echo  [OK] האתר נבנה בהצלחה
+    echo  [OK] Website built successfully
 ) else (
-    echo  [OK] גרסה בנויה קיימת ותקינה
+    echo  [OK] Build exists
 )
 
-:: ================================================================
-::  STEP 6 - קבלת כתובת IP
-:: ================================================================
-for /f %%i in ('powershell -NoProfile -Command "try { (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notlike '127.*' -and $_.IPAddress -notlike '169.*' } | Select-Object -First 1).IPAddress } catch { 'לא נמצא' }"') do set LOCAL_IP=%%i
+:: ---- Get local IP ----
+for /f %%i in ('powershell -NoProfile -Command "(Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notlike '127.*' -and $_.IPAddress -notlike '169.*' } | Select-Object -First 1).IPAddress"') do set LOCAL_IP=%%i
 
-:: ================================================================
-::  הכל תקין - מפעיל
-:: ================================================================
 echo.
 echo  ============================================================
-color 0B
 echo.
-echo   כל הבדיקות עברו בהצלחה!
-echo   האתר עולה...
+echo   Website is running!
 echo.
-echo   [מחשב זה]
-echo    http://localhost:3000
+echo   [This computer]    http://localhost:3000
+echo   [Mobile - WiFi]    http://%LOCAL_IP%:3000
+echo   [Client portal]    http://%LOCAL_IP%:3000/portal
+echo   [Admin panel]      http://%LOCAL_IP%:3000/admin
+echo   [Admin login]      admin / admin123
 echo.
-echo   [גישה מהנייד - אותו WiFi]
-echo    http://%LOCAL_IP%:3000
-echo.
-echo   [פורטל לקוחות]
-echo    http://%LOCAL_IP%:3000/portal
-echo.
-echo   [פאנל ניהול]
-echo    http://%LOCAL_IP%:3000/admin
-echo    משתמש: admin  סיסמה: admin123
-echo.
-echo   לעצירה: לחץ Ctrl+C
+echo   Press Ctrl+C to stop
 echo  ============================================================
 echo.
-color 0A
 
-:: פתח דפדפן
 start http://localhost:3000
 
-:: הפעל שרת
 npx next start -H 0.0.0.0 -p 3000
 
 pause
-goto :EOF
-
-:: ================================================================
-::  פונקציית בדיקת קובץ
-:: ================================================================
-:CHECK_FILE
-if not exist %1 (
-    echo  [חסר] %~2 ^(%~1^)
-    set AUDIT_FAIL=1
-) else (
-    echo  [OK]  %~2
-)
-goto :EOF
