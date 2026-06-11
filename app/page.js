@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import TermsGate from './terms/TermsGate'
 
 function useCountUp(target, duration = 2000, start = false) {
   const [count, setCount] = useState(0)
@@ -25,6 +26,9 @@ export default function HomePage() {
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', message: '' })
   const [formSent, setFormSent] = useState(false)
   const [formLoading, setFormLoading] = useState(false)
+  const [termsToken, setTermsToken] = useState(null)
+  const [consented, setConsented] = useState(false)
+  const [formError, setFormError] = useState('')
   const [statsVisible, setStatsVisible] = useState(false)
   const statsRef = useRef(null)
 
@@ -49,17 +53,33 @@ export default function HomePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setFormError('')
+    // אכיפה גם בצד הלקוח: אין שליחה ללא אישור מתועד של התקנון.
+    if (!consented || !termsToken) {
+      setFormError('יש לפתוח ולאשר את התקנון לפני שליחת הטופס.')
+      return
+    }
     setFormLoading(true)
     try {
-      await fetch('/api/contact', {
+      const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, termsToken }),
       })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        // אם אישור התקנון נדחה (פג/נוצל) — מאפסים את ההסכמה ומבקשים מחדש.
+        setConsented(false)
+        setTermsToken(null)
+        setFormError(data.error || 'שליחת הטופס נכשלה. נסו שנית.')
+        return
+      }
       setFormSent(true)
       setFormData({ name: '', phone: '', email: '', message: '' })
+      setConsented(false)
+      setTermsToken(null)
     } catch {
-      setFormSent(true)
+      setFormError('אירעה תקלה בשליחה. נסו שנית.')
     } finally {
       setFormLoading(false)
     }
@@ -749,9 +769,23 @@ export default function HomePage() {
                     />
                   </div>
 
+                  <div className="border-t border-[#1e1e1e] pt-5">
+                    <TermsGate
+                      consented={consented}
+                      token={termsToken}
+                      onConsent={(t) => { setTermsToken(t); setConsented(true); setFormError('') }}
+                      onRevoke={() => { setConsented(false); setTermsToken(null) }}
+                    />
+                  </div>
+
+                  {formError && (
+                    <p className="text-red-400 text-sm text-center">{formError}</p>
+                  )}
+
                   <button
                     type="submit"
-                    disabled={formLoading}
+                    disabled={formLoading || !consented}
+                    title={!consented ? 'יש לאשר את התקנון תחילה' : undefined}
                     className="btn-gold w-full py-4 text-base disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {formLoading ? (
@@ -823,6 +857,7 @@ export default function HomePage() {
               <a href="#about" className="hover:text-gold-400 transition-colors cursor-pointer">אודות</a>
               <a href="#services" className="hover:text-gold-400 transition-colors cursor-pointer">תחומי עיסוק</a>
               <a href="#contact" className="hover:text-gold-400 transition-colors cursor-pointer">צור קשר</a>
+              <Link href="/terms" className="hover:text-gold-400 transition-colors cursor-pointer">תקנון</Link>
               <Link href="/portal" className="hover:text-gold-400 transition-colors cursor-pointer">פורטל לקוחות</Link>
             </div>
           </div>
