@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { signIn, useSession } from 'next-auth/react'
+import { signIn, getSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -9,7 +9,7 @@ import { Suspense } from 'react'
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') || '/portal'
+  const callbackUrl = searchParams.get('callbackUrl')
 
   const [credentials, setCredentials] = useState({ username: '', password: '' })
   const [error, setError] = useState('')
@@ -31,8 +31,12 @@ function LoginForm() {
 
     if (result?.error) {
       setError('שם משתמש או סיסמה שגויים')
-    } else {
+    } else if (callbackUrl) {
       router.push(callbackUrl)
+    } else {
+      // ללא יעד מפורש — הפניה לפי סוג המשתמש: מנהל לפאנל הניהול, לקוח לפורטל
+      const session = await getSession()
+      router.push(session?.user?.role === 'admin' ? '/admin' : '/portal')
     }
   }
 
