@@ -1,12 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { LITIGATION_AREAS, AREA_LABELS } from '@/lib/legal-sources'
 
 const ROLE_LABELS = { plaintiff: 'ייצוג תובע', defendant: 'ייצוג נתבע' }
 
-export default function LitigationPage() {
+function LitigationContent() {
+  const searchParams = useSearchParams()
+  const preselectCase = searchParams.get('case')
   const [profiles, setProfiles] = useState([])
   const [cases, setCases] = useState([])
   const [loading, setLoading] = useState(true)
@@ -30,6 +33,21 @@ export default function LitigationPage() {
 
   const usedCaseIds = new Set(profiles.map(p => p.case_id))
   const availableCases = cases.filter(c => !usedCaseIds.has(c.id))
+
+  // הגעה מעמוד לקוח/תיק עם ?case=<id>: אם כבר קיים תיק ליטיגציה — מעבר אליו;
+  // אחרת פתיחת טופס הפתיחה כשהתיק מסומן מראש
+  useEffect(() => {
+    if (loading || !preselectCase) return
+    const caseIdNum = Number(preselectCase)
+    const existing = profiles.find(p => p.case_id === caseIdNum)
+    if (existing) {
+      window.location.href = `/admin/litigation/${existing.id}`
+      return
+    }
+    setForm(f => ({ ...f, caseId: preselectCase }))
+    setShowForm(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, preselectCase])
 
   const handleCreate = async (e) => {
     e.preventDefault()
@@ -157,5 +175,13 @@ export default function LitigationPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function LitigationPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-gray-500">טוען...</div>}>
+      <LitigationContent />
+    </Suspense>
   )
 }

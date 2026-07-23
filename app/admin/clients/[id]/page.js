@@ -116,7 +116,7 @@ export default function ClientDetailPage() {
                     ליטיגציה
                   </Link>
                 ) : (
-                  <Link href="/admin/litigation" className="text-gray-500 hover:text-gold-400 text-sm px-3 py-2 transition-colors">
+                  <Link href={`/admin/litigation?case=${c.id}`} className="text-gray-500 hover:text-gold-400 text-sm px-3 py-2 transition-colors">
                     + ליטיגציה
                   </Link>
                 )}
