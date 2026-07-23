@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 export default function AdminClientsPage() {
   const [clients, setClients] = useState([])
@@ -179,22 +180,30 @@ export default function AdminClientsPage() {
           <div className="divide-y divide-[#1a1a1a]">
             {clients.map(client => (
               <div key={client.id} className="px-6 py-4 flex items-center gap-4 hover:bg-[#131313] transition-colors">
-                <div className="w-10 h-10 bg-gold-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <span className="text-gold-400 font-bold text-sm">{client.name[0]}</span>
-                </div>
-                <div className="flex-1">
-                  <div className="text-white font-medium">{client.name}</div>
-                  <div className="flex items-center gap-3 text-xs text-gray-600 mt-0.5">
-                    <span dir="ltr">{client.username}</span>
-                    {client.email && <span dir="ltr">{client.email}</span>}
-                    {client.phone && <span>{client.phone}</span>}
+                <Link href={`/admin/clients/${client.id}`} className="flex items-center gap-4 flex-1 min-w-0 group">
+                  <div className="w-10 h-10 bg-gold-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span className="text-gold-400 font-bold text-sm">{client.name[0]}</span>
                   </div>
-                </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white font-medium group-hover:text-gold-400 transition-colors">{client.name}</div>
+                    <div className="flex items-center gap-3 text-xs text-gray-600 mt-0.5">
+                      <span dir="ltr">{client.username}</span>
+                      {client.email && <span dir="ltr">{client.email}</span>}
+                      {client.phone && <span>{client.phone}</span>}
+                    </div>
+                  </div>
+                </Link>
                 <div className="flex items-center gap-2 text-xs text-gray-600">
                   <span>{client.case_count || 0} תיקים</span>
                   <span className="text-gray-700">|</span>
                   <span>{new Date(client.created_at).toLocaleDateString('he-IL')}</span>
                 </div>
+                <Link
+                  href={`/admin/clients/${client.id}`}
+                  className="btn-outline-gold text-sm px-4 py-2"
+                >
+                  נהל תיקים
+                </Link>
                 <button
                   onClick={() => handleDelete(client.id, client.name)}
                   className="text-red-400/50 hover:text-red-400 transition-colors p-2 hover:bg-red-900/10 rounded-lg"
