@@ -174,6 +174,39 @@ function LitigationContent() {
           </div>
         )}
       </div>
+
+      {/* תיקים שממתינים לפתיחת ליטיגציה */}
+      {!loading && availableCases.length > 0 && (
+        <div className="bg-[#111] border border-[#1e1e1e] rounded-xl overflow-hidden mt-6">
+          <div className="px-6 py-4 border-b border-[#1e1e1e] flex items-center justify-between">
+            <div>
+              <h2 className="text-white font-bold">תיקים שממתינים לפתיחת ליטיגציה</h2>
+              <p className="text-gray-600 text-xs mt-0.5">תיקים קיימים שעדיין לא נפתח עבורם הליך ליטיגציה</p>
+            </div>
+            <span className="text-gray-500 text-sm">{availableCases.length} תיקים</span>
+          </div>
+          <div className="divide-y divide-[#1a1a1a]">
+            {availableCases.map(c => (
+              <Link
+                key={c.id}
+                href={`/admin/litigation?case=${c.id}`}
+                className="flex items-center gap-4 px-6 py-4 hover:bg-[#131313] transition-colors group"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="text-gray-500 text-xs">{c.client_name}</span>
+                    {c.case_number && <span className="text-gray-700 text-xs">#{c.case_number}</span>}
+                  </div>
+                  <div className="text-white text-sm font-medium group-hover:text-gold-400 transition-colors">{c.title}</div>
+                </div>
+                <span className="btn-outline-gold text-sm px-4 py-2 group-hover:bg-gold-500 group-hover:text-black transition-colors">
+                  פתח ליטיגציה
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
