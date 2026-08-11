@@ -13,7 +13,8 @@
     "react": "^19",
     "react-dom": "^19",
     "next-auth": "^4.24.11",
-    "bcryptjs": "^3.0.2"
+    "bcryptjs": "^3.0.2",
+    "@anthropic-ai/sdk": "^0.68.0"
   },
   "devDependencies": {
     "tailwindcss": "^3.4.4",

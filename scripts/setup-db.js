@@ -17,7 +17,7 @@ const UPLOADS_DIR = path.join(DATA_DIR, 'uploads')
 
 if (!fs.existsSync('.env.local')) {
   const secret = crypto.randomBytes(32).toString('hex')
-  fs.writeFileSync('.env.local', `NEXTAUTH_URL=http://localhost:3000\nNEXTAUTH_SECRET=${secret}\nDATABASE_PATH=./data/law.db\nUPLOAD_DIR=./data/uploads\n`)
+  fs.writeFileSync('.env.local', `NEXTAUTH_URL=http://localhost:3000\nNEXTAUTH_SECRET=${secret}\nDATABASE_PATH=./data/law.db\nUPLOAD_DIR=./data/uploads\n# מפתח API של Anthropic — נדרש לניתוח AI של חוות הדעת (https://console.anthropic.com)\nANTHROPIC_API_KEY=\n`)
   console.log('Created .env.local with secure NEXTAUTH_SECRET')
 }
 

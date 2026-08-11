@@ -147,8 +147,13 @@ export function SourcePicker({ area, docType, selected, onChange }) {
 
 /* ===== מעטפת טופס מחולל ===== */
 
-function GeneratorForm({ profile, docType, title, description, buildData, valid = () => true, children }) {
-  const [sourceIds, setSourceIds] = useState([])
+function GeneratorForm({
+  profile, docType, title, description, buildData, valid = () => true, children,
+  sourceIds: sourceIdsProp, setSourceIds: setSourceIdsProp, headerExtra,
+}) {
+  const [internalSourceIds, setInternalSourceIds] = useState([])
+  const sourceIds = sourceIdsProp ?? internalSourceIds
+  const setSourceIds = setSourceIdsProp ?? setInternalSourceIds
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -178,6 +183,7 @@ function GeneratorForm({ profile, docType, title, description, buildData, valid 
     <div className="bg-[#111] border border-[#1e1e1e] rounded-xl p-6">
       <h2 className="text-white font-bold text-lg mb-1">{title}</h2>
       {description && <p className="text-gray-500 text-sm mb-5">{description}</p>}
+      {headerExtra}
       {error && <Notice kind="error">{error}</Notice>}
       {success && <Notice kind="success">{success}</Notice>}
       <form onSubmit={handleSubmit}>
@@ -423,17 +429,122 @@ export function FeeAgreementForm({ profile }) {
 
 /* ===== 5. מחולל חוות דעת ראשונית ===== */
 
+function AiOpinionPanel({ profile, onApply }) {
+  const [files, setFiles] = useState([])
+  const [selected, setSelected] = useState([])
+  const [running, setRunning] = useState(false)
+  const [error, setError] = useState('')
+  const [note, setNote] = useState('')
+
+  useEffect(() => {
+    fetch(`/api/files?caseId=${profile.case_id}`)
+      .then(r => r.json())
+      .then(d => setFiles(d.files || []))
+      .catch(() => {})
+  }, [profile.case_id])
+
+  const analyzable = files.filter(f =>
+    (f.mime_type || '').startsWith('image/') || f.mime_type === 'application/pdf'
+  )
+
+  const toggle = (id) => setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id])
+
+  const run = async () => {
+    setError(''); setNote(''); setRunning(true)
+    try {
+      const res = await fetch(`/api/admin/litigation/${profile.id}/opinion-ai`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileIds: selected }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'שגיאה בניתוח')
+      onApply(data.analysis)
+      const skipped = data.skippedFiles?.length
+        ? ` (קבצים שלא נותחו: ${data.skippedFiles.join(', ')})` : ''
+      setNote(`הניתוח הופק ומולא בטופס — עבור עליו, ערוך ואשר לפני יצירת המסמך.${skipped}`)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setRunning(false)
+    }
+  }
+
+  return (
+    <div className="border border-gold-500/30 bg-gold-500/5 rounded-xl p-4 mb-5">
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-lg">✨</span>
+        <div className="text-white font-bold text-sm">ניתוח AI אוטומטי</div>
+      </div>
+      <p className="text-gray-400 text-xs mb-3">
+        המערכת תקרא את תיאור העובדות (וכל תמונה/מסמך שתסמן), תעריך סיכויים, תנתח חוזקות וחולשות,
+        תבסס על מקורות משפטיים רלוונטיים ותמלא את הטופס. הכל ניתן לעריכה לאחר מכן.
+      </p>
+
+      {analyzable.length > 0 && (
+        <div className="mb-3">
+          <div className="text-gray-500 text-xs mb-1.5">מסמכים/תמונות מהתיק לניתוח (אופציונלי):</div>
+          <div className="flex flex-wrap gap-2">
+            {analyzable.map(f => (
+              <label
+                key={f.id}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs cursor-pointer border transition-all ${
+                  selected.includes(f.id)
+                    ? 'border-gold-500/50 bg-gold-500/10 text-gold-300'
+                    : 'border-[#1e1e1e] text-gray-400 hover:border-[#333]'
+                }`}
+              >
+                <input type="checkbox" checked={selected.includes(f.id)} onChange={() => toggle(f.id)} className="accent-yellow-500" />
+                {(f.mime_type || '').startsWith('image/') ? '🖼️' : '📄'} {f.original_name}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {error && <Notice kind="error">{error}</Notice>}
+      {note && <Notice kind="success">{note}</Notice>}
+
+      <button type="button" onClick={run} disabled={running} className="btn-gold text-sm disabled:opacity-60">
+        {running ? 'מנתח... (עשוי לקחת עד דקה)' : '✨ נתח אוטומטית ומלא את הטופס'}
+      </button>
+    </div>
+  )
+}
+
 export function OpinionForm({ profile }) {
   const facts = profile.facts ? JSON.parse(profile.facts) : {}
-  const [form, set] = useForm({
+  const [sourceIds, setSourceIds] = useState([])
+  const [form, set, setForm] = useForm({
     background: facts.chronology || '', legalQuestions: '', strengths: '', weaknesses: '',
     analysis: '', prospects: 'medium', prospectsReasoning: '', recommendations: '',
   })
+
+  const applyAnalysis = (a) => {
+    setForm(f => ({
+      ...f,
+      background: a.background || f.background,
+      legalQuestions: a.legalQuestions || f.legalQuestions,
+      strengths: a.strengths || f.strengths,
+      weaknesses: a.weaknesses || f.weaknesses,
+      analysis: [a.analysis, a.documentObservations ? `\n\nממצאים מהמסמכים/התמונות:\n${a.documentObservations}` : '']
+        .filter(Boolean).join(''),
+      prospects: a.prospects || f.prospects,
+      prospectsReasoning: a.prospectsReasoning || f.prospectsReasoning,
+      recommendations: a.recommendations || f.recommendations,
+    }))
+    if (Array.isArray(a.citedSourceIds) && a.citedSourceIds.length) {
+      setSourceIds(a.citedSourceIds)
+    }
+  }
+
   return (
     <GeneratorForm
       profile={profile} docType="opinion" title="מחולל חוות דעת ראשונית"
       description="הערכת סיכויי ההליך על יסוד העובדות והדין — נשענת על לפחות 3 מקורות משפטיים"
       buildData={() => form}
+      sourceIds={sourceIds} setSourceIds={setSourceIds}
+      headerExtra={<AiOpinionPanel profile={profile} onApply={applyAnalysis} />}
       valid={() => {
         if (!form.background.trim()) return 'יש למלא רקע עובדתי'
         if (!form.legalQuestions.trim()) return 'יש למלא את השאלות המשפטיות'
