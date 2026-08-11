@@ -429,7 +429,7 @@ export function FeeAgreementForm({ profile }) {
 
 /* ===== 5. מחולל חוות דעת ראשונית ===== */
 
-function AiOpinionPanel({ profile, onApply }) {
+function AiPanel({ profile, endpoint, blurb, button, onApply, warn }) {
   const [files, setFiles] = useState([])
   const [selected, setSelected] = useState([])
   const [running, setRunning] = useState(false)
@@ -452,7 +452,7 @@ function AiOpinionPanel({ profile, onApply }) {
   const run = async () => {
     setError(''); setNote(''); setRunning(true)
     try {
-      const res = await fetch(`/api/admin/litigation/${profile.id}/opinion-ai`, {
+      const res = await fetch(`/api/admin/litigation/${profile.id}/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fileIds: selected }),
@@ -462,7 +462,7 @@ function AiOpinionPanel({ profile, onApply }) {
       onApply(data.analysis)
       const skipped = data.skippedFiles?.length
         ? ` (קבצים שלא נותחו: ${data.skippedFiles.join(', ')})` : ''
-      setNote(`הניתוח הופק ומולא בטופס — עבור עליו, ערוך ואשר לפני יצירת המסמך.${skipped}`)
+      setNote(`הופק ומולא בטופס — עבור עליו, ערוך ואשר לפני יצירת המסמך.${skipped}`)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -476,10 +476,8 @@ function AiOpinionPanel({ profile, onApply }) {
         <span className="text-lg">✨</span>
         <div className="text-white font-bold text-sm">ניתוח AI אוטומטי</div>
       </div>
-      <p className="text-gray-400 text-xs mb-3">
-        המערכת תקרא את תיאור העובדות (וכל תמונה/מסמך שתסמן), תעריך סיכויים, תנתח חוזקות וחולשות,
-        תבסס על מקורות משפטיים רלוונטיים ותמלא את הטופס. הכל ניתן לעריכה לאחר מכן.
-      </p>
+      <p className="text-gray-400 text-xs mb-3">{blurb}</p>
+      {warn && <p className="text-red-300/80 text-xs mb-3">{warn}</p>}
 
       {analyzable.length > 0 && (
         <div className="mb-3">
@@ -506,7 +504,7 @@ function AiOpinionPanel({ profile, onApply }) {
       {note && <Notice kind="success">{note}</Notice>}
 
       <button type="button" onClick={run} disabled={running} className="btn-gold text-sm disabled:opacity-60">
-        {running ? 'מנתח... (עשוי לקחת עד דקה)' : '✨ נתח אוטומטית ומלא את הטופס'}
+        {running ? 'מנתח... (עשוי לקחת עד דקה)' : button}
       </button>
     </div>
   )
@@ -544,7 +542,13 @@ export function OpinionForm({ profile }) {
       description="הערכת סיכויי ההליך על יסוד העובדות והדין — נשענת על לפחות 3 מקורות משפטיים"
       buildData={() => form}
       sourceIds={sourceIds} setSourceIds={setSourceIds}
-      headerExtra={<AiOpinionPanel profile={profile} onApply={applyAnalysis} />}
+      headerExtra={
+        <AiPanel
+          profile={profile} endpoint="opinion-ai" onApply={applyAnalysis}
+          button="✨ נתח אוטומטית ומלא את הטופס"
+          blurb="המערכת תקרא את תיאור העובדות (וכל תמונה/מסמך שתסמן), תעריך סיכויים, תנתח חוזקות וחולשות, תבסס על מקורות משפטיים ותמלא את הטופס. הכל ניתן לעריכה לאחר מכן."
+        />
+      }
       valid={() => {
         if (!form.background.trim()) return 'יש למלא רקע עובדתי'
         if (!form.legalQuestions.trim()) return 'יש למלא את השאלות המשפטיות'
@@ -636,7 +640,8 @@ const COURTS = ['משפט השלום', 'המשפט המחוזי', 'הדין הא
 export function ClaimForm({ profile }) {
   const intake = profile.intake ? JSON.parse(profile.intake) : {}
   const facts = profile.facts ? JSON.parse(profile.facts) : {}
-  const [form, set] = useForm({
+  const [sourceIds, setSourceIds] = useState([])
+  const [form, set, setForm] = useForm({
     court: 'משפט השלום', courtCity: '', officeAddress: '',
     defendantName: intake.opposingName || '', defendantId: intake.opposingId || '',
     defendantAddress: intake.opposingAddress || '',
@@ -644,11 +649,33 @@ export function ClaimForm({ profile }) {
     jurisdiction: '', priorProceedings: intake.previousProceedings || '',
     summary: '', facts: facts.chronology || '', legalArguments: '', remedies: '',
   })
+
+  const applyClaim = (a) => {
+    setForm(f => ({
+      ...f,
+      claimNature: a.claimNature || f.claimNature,
+      jurisdiction: a.jurisdiction || f.jurisdiction,
+      summary: a.summary || f.summary,
+      facts: a.facts || f.facts,
+      legalArguments: a.legalArguments || f.legalArguments,
+      remedies: a.remedies || f.remedies,
+    }))
+    if (Array.isArray(a.citedSourceIds) && a.citedSourceIds.length) setSourceIds(a.citedSourceIds)
+  }
+
   return (
     <GeneratorForm
       profile={profile} docType="statement_of_claim" title="מחולל כתב תביעה"
       description='מבנה לפי תקנות 9–10 לתקנות סדר הדין האזרחי, תשע"ט-2018: כותרת, פרטי תביעה, תמצית טענות ופירוט עובדות'
       buildData={() => form}
+      sourceIds={sourceIds} setSourceIds={setSourceIds}
+      headerExtra={
+        <AiPanel
+          profile={profile} endpoint="claim-ai" onApply={applyClaim}
+          button="✨ נסח טיוטת כתב תביעה"
+          blurb="המערכת תנסח תמצית טענות, פירוט עובדות ממוספר, טיעון משפטי וסעדים — על יסוד תיאור המקרה, המקורות המשפטיים, וכל תמונה/מסמך שתסמן. פרטי הצדדים והסכומים נשארים לעריכתך."
+        />
+      }
       valid={() => {
         if (!form.defendantName.trim()) return 'יש למלא את פרטי הנתבע'
         if (!form.summary.trim()) return 'יש למלא תמצית טענות'
@@ -707,6 +734,7 @@ const PRELIM_OPTIONS = [
 ]
 
 export function DefenseForm({ profile }) {
+  const [sourceIds, setSourceIds] = useState([])
   const [form, set, setForm] = useForm({
     court: 'משפט השלום', courtCity: '', caseNumber: profile.case_number || '',
     plaintiffName: '', plaintiffCounsel: '',
@@ -720,6 +748,17 @@ export function DefenseForm({ profile }) {
         : [...f.preliminaryDefenses, v],
     }))
   }
+
+  const applyDefense = (a) => {
+    setForm(f => ({
+      ...f,
+      preliminaryDefenses: Array.isArray(a.preliminaryDefenses) ? a.preliminaryDefenses : f.preliminaryDefenses,
+      responses: a.responses || f.responses,
+      defendantVersion: a.defendantVersion || f.defendantVersion,
+      counterArguments: a.counterArguments || f.counterArguments,
+    }))
+    if (Array.isArray(a.citedSourceIds) && a.citedSourceIds.length) setSourceIds(a.citedSourceIds)
+  }
   return (
     <div className="space-y-6">
       {profile.opposing_claim && (
@@ -732,6 +771,15 @@ export function DefenseForm({ profile }) {
         profile={profile} docType="statement_of_defense" title="מחולל כתב הגנה"
         description="טענות מקדמיות, מענה סעיף-סעיף וגרסת הנתבע — בהתאם לתקנות סדר הדין האזרחי"
         buildData={() => form}
+        sourceIds={sourceIds} setSourceIds={setSourceIds}
+        headerExtra={
+          <AiPanel
+            profile={profile} endpoint="defense-ai" onApply={applyDefense}
+            button="✨ נסח טיוטת כתב הגנה"
+            blurb="המערכת תנתח את כתב התביעה שהתקבל וגרסת הלקוח, תזהה טענות מקדמיות רלוונטיות, תנסח מענה סעיף-סעיף, גרסת נתבע וטיעון משפטי — מבוסס על המקורות המשפטיים וכל מסמך שתסמן."
+            warn={!profile.opposing_claim ? 'לא הוזן כתב תביעה שהתקבל — הניתוח יהיה כללי. מומלץ להזין אותו תחילה בלשונית "כתב התביעה שהתקבל".' : undefined}
+          />
+        }
         valid={() => {
           if (!form.plaintiffName.trim()) return 'יש למלא את שם התובע'
           if (!form.responses.trim()) return 'יש למלא מענה לטענות כתב התביעה'
