@@ -429,13 +429,16 @@ export function FeeAgreementForm({ profile }) {
 
 /* ===== 5. מחולל חוות דעת ראשונית ===== */
 
-function AiPanel({ profile, endpoint, blurb, button, onApply, warn, factsText, setFactsText, factsLabel }) {
+function AiPanel({ profile, endpoint, blurb, button, onApply, warn, factsText, setFactsText, factsLabel, clarify }) {
   const [files, setFiles] = useState([])
   const [selected, setSelected] = useState([])
   const [running, setRunning] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [note, setNote] = useState('')
+  const [questions, setQuestions] = useState([])
+  const [answers, setAnswers] = useState({})
+  const [asking, setAsking] = useState(false)
   const fileInputRef = useRef(null)
 
   const loadFiles = useCallback(() => {
@@ -481,20 +484,47 @@ function AiPanel({ profile, endpoint, blurb, button, onApply, warn, factsText, s
     }
   }
 
-  const run = async () => {
-    setError(''); setNote(''); setRunning(true)
+  const askQuestions = async () => {
+    setError(''); setNote(''); setAsking(true)
     try {
       const res = await fetch(`/api/admin/litigation/${profile.id}/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileIds: selected, factsText }),
+        body: JSON.stringify({ mode: 'questions', fileIds: selected, factsText }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'שגיאה בהפקת שאלות')
+      const qs = data.questions || []
+      setQuestions(qs)
+      setAnswers({})
+      setNote(qs.length
+        ? 'המחולל העלה שאלות הבהרה — ענה על הרלוונטיות (אפשר לדלג על חלקן) ואז נסח את הטיוטה.'
+        : 'אין שאלות הבהרה נוספות — ניתן לנסח את הטיוטה.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setAsking(false)
+    }
+  }
+
+  const run = async () => {
+    setError(''); setNote(''); setRunning(true)
+    try {
+      const answered = questions
+        .map(q => ({ question: q.question, answer: (answers[q.id] || '').trim() }))
+        .filter(a => a.answer)
+      const res = await fetch(`/api/admin/litigation/${profile.id}/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileIds: selected, factsText, answers: answered }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'שגיאה בניתוח')
       onApply(data.analysis)
       const skipped = data.skippedFiles?.length
         ? ` (קבצים שלא נותחו: ${data.skippedFiles.join(', ')})` : ''
-      setNote(`הופק ומולא בטופס — עבור עליו, ערוך ואשר לפני יצירת המסמך.${skipped}`)
+      const used = answered.length ? ` שולבו ${answered.length} הבהרות.` : ''
+      setNote(`הופק ומולא בטופס — עבור עליו, ערוך ואשר לפני יצירת המסמך.${used}${skipped}`)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -560,12 +590,43 @@ function AiPanel({ profile, endpoint, blurb, button, onApply, warn, factsText, s
         )}
       </div>
 
+      {clarify && questions.length > 0 && (
+        <div className="mb-3 border border-gold-500/20 rounded-lg p-3 bg-black/20">
+          <div className="text-gold-300 font-bold text-xs mb-2">שאלות הבהרה מהמחולל — ענה כדי לחדד את הטיעון (לא חובה על כולן):</div>
+          <div className="space-y-3">
+            {questions.map((q, i) => (
+              <div key={q.id || i}>
+                <div className="text-gray-200 text-xs font-medium">{i + 1}. {q.question}</div>
+                {q.why && <div className="text-gray-500 text-[11px] mb-1">מדוע חשוב: {q.why}</div>}
+                <textarea
+                  rows={2}
+                  value={answers[q.id] || ''}
+                  onChange={e => setAnswers(a => ({ ...a, [q.id]: e.target.value }))}
+                  className="input-dark resize-y text-sm"
+                  placeholder="תשובתך (אפשר להשאיר ריק ולדלג)..."
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {error && <Notice kind="error">{error}</Notice>}
       {note && <Notice kind="success">{note}</Notice>}
 
-      <button type="button" onClick={run} disabled={running} className="btn-gold text-sm disabled:opacity-60">
-        {running ? 'מנתח... (עשוי לקחת עד דקה)' : button}
-      </button>
+      <div className="flex flex-wrap gap-2">
+        {clarify && (
+          <button
+            type="button" onClick={askQuestions} disabled={asking || running}
+            className="text-sm px-4 py-2 rounded-lg border border-gold-500/40 text-gold-300 hover:bg-gold-500/10 disabled:opacity-60"
+          >
+            {asking ? 'מכין שאלות...' : (questions.length ? '↻ רענן שאלות הבהרה' : '❓ קבל שאלות הבהרה')}
+          </button>
+        )}
+        <button type="button" onClick={run} disabled={running || asking} className="btn-gold text-sm disabled:opacity-60">
+          {running ? 'מנסח... (עשוי לקחת עד דקה)' : button}
+        </button>
+      </div>
     </div>
   )
 }
@@ -709,6 +770,7 @@ export function ClaimForm({ profile }) {
   const intake = profile.intake ? JSON.parse(profile.intake) : {}
   const facts = profile.facts ? JSON.parse(profile.facts) : {}
   const [sourceIds, setSourceIds] = useState([])
+  const [factsText, setFactsText] = useState(facts.chronology || '')
   const [form, set, setForm] = useForm({
     court: 'משפט השלום', courtCity: '', officeAddress: '',
     defendantName: intake.opposingName || '', defendantId: intake.opposingId || '',
@@ -739,9 +801,11 @@ export function ClaimForm({ profile }) {
       sourceIds={sourceIds} setSourceIds={setSourceIds}
       headerExtra={
         <AiPanel
-          profile={profile} endpoint="claim-ai" onApply={applyClaim}
+          profile={profile} endpoint="claim-ai" onApply={applyClaim} clarify
+          factsText={factsText} setFactsText={setFactsText}
+          factsLabel="תיאור המקרה / טענות התובע (יישמר בתיק וישמש בסיס לניסוח):"
           button="✨ נסח טיוטת כתב תביעה"
-          blurb="המערכת תנסח תמצית טענות, פירוט עובדות ממוספר, טיעון משפטי וסעדים — על יסוד תיאור המקרה, המקורות המשפטיים, וכל תמונה/מסמך שתסמן. פרטי הצדדים והסכומים נשארים לעריכתך."
+          blurb="הזן/י את תיאור המקרה והעלה/י מסמכים. מומלץ ללחוץ תחילה על ‘קבל שאלות הבהרה’ — המחולל יעלה שאלות ממוקדות, ולאחר שתענה עליהן ינסח תמצית טענות, פירוט עובדות ממוספר, טיעון משפטי וסעדים — על יסוד המקורות המשפטיים. פרטי הצדדים והסכומים נשארים לעריכתך."
         />
       }
       valid={() => {
@@ -802,7 +866,9 @@ const PRELIM_OPTIONS = [
 ]
 
 export function DefenseForm({ profile }) {
+  const facts = profile.facts ? JSON.parse(profile.facts) : {}
   const [sourceIds, setSourceIds] = useState([])
+  const [factsText, setFactsText] = useState(facts.chronology || '')
   const [form, set, setForm] = useForm({
     court: 'משפט השלום', courtCity: '', caseNumber: profile.case_number || '',
     plaintiffName: '', plaintiffCounsel: '',
@@ -842,9 +908,11 @@ export function DefenseForm({ profile }) {
         sourceIds={sourceIds} setSourceIds={setSourceIds}
         headerExtra={
           <AiPanel
-            profile={profile} endpoint="defense-ai" onApply={applyDefense}
+            profile={profile} endpoint="defense-ai" onApply={applyDefense} clarify
+            factsText={factsText} setFactsText={setFactsText}
+            factsLabel="גרסת/טענות הלקוח (יישמר בתיק וישמש בסיס לניסוח):"
             button="✨ נסח טיוטת כתב הגנה"
-            blurb="המערכת תנתח את כתב התביעה שהתקבל וגרסת הלקוח, תזהה טענות מקדמיות רלוונטיות, תנסח מענה סעיף-סעיף, גרסת נתבע וטיעון משפטי — מבוסס על המקורות המשפטיים וכל מסמך שתסמן."
+            blurb="הזן/י את גרסת הלקוח וטענותיו והעלה/י מסמכים. מומלץ ללחוץ תחילה על ‘קבל שאלות הבהרה’ — המחולל ינתח את כתב התביעה שהתקבל ויעלה שאלות ממוקדות; לאחר שתענה עליהן יזהה טענות מקדמיות רלוונטיות, ינסח מענה סעיף-סעיף, גרסת נתבע וטיעון משפטי — מבוסס על המקורות המשפטיים."
             warn={!profile.opposing_claim ? 'לא הוזן כתב תביעה שהתקבל — הניתוח יהיה כללי. מומלץ להזין אותו תחילה בלשונית "כתב התביעה שהתקבל".' : undefined}
           />
         }

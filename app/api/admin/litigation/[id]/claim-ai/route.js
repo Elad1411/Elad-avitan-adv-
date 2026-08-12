@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../../../../auth/[...nextauth]/route'
 import { getDb } from '@/lib/db'
 import { getSourcesForArea, AREA_LABELS } from '@/lib/legal-sources'
-import { draftClaim, hasAiKey } from '@/lib/ai'
+import { draftClaim, clarifyQuestions, hasAiKey } from '@/lib/ai'
 
 export async function POST(request, { params }) {
   const session = await getServerSession(authOptions)
@@ -23,8 +23,14 @@ export async function POST(request, { params }) {
   `).get(id)
   if (!profile) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const { fileIds = [] } = await request.json().catch(() => ({}))
+  const { fileIds = [], factsText, answers = [], mode } = await request.json().catch(() => ({}))
   const facts = profile.facts ? JSON.parse(profile.facts) : {}
+  // תיאור/טענות שהוזנו ישירות בפאנל — נשמרים בתיק ומשמשים בסיס לניסוח
+  if (typeof factsText === 'string' && factsText.trim()) {
+    facts.chronology = factsText.trim()
+    db.prepare('UPDATE litigation_profiles SET facts = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+      .run(JSON.stringify(facts), id)
+  }
   const sources = getSourcesForArea(profile.area)
 
   let files = []
@@ -35,10 +41,17 @@ export async function POST(request, { params }) {
     ).all(...fileIds, profile.case_id)
   }
 
+  const areaLabel = AREA_LABELS[profile.area] || profile.area
+
   try {
+    if (mode === 'questions') {
+      const { questions, skippedFiles, model } = await clarifyQuestions({
+        kind: 'claim', areaLabel, facts, sources, files,
+      })
+      return NextResponse.json({ questions, skippedFiles, model })
+    }
     const { analysis, skippedFiles, model } = await draftClaim({
-      areaLabel: AREA_LABELS[profile.area] || profile.area,
-      facts, sources, files,
+      areaLabel, facts, sources, files, answers,
     })
     return NextResponse.json({ analysis, skippedFiles, model })
   } catch (err) {
