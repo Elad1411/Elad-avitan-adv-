@@ -17,7 +17,7 @@ const UPLOADS_DIR = path.join(DATA_DIR, 'uploads')
 
 if (!fs.existsSync('.env.local')) {
   const secret = crypto.randomBytes(32).toString('hex')
-  fs.writeFileSync('.env.local', `NEXTAUTH_URL=http://localhost:3000\nNEXTAUTH_SECRET=${secret}\nDATABASE_PATH=./data/law.db\nUPLOAD_DIR=./data/uploads\n`)
+  fs.writeFileSync('.env.local', `NEXTAUTH_URL=http://localhost:3000\nNEXTAUTH_SECRET=${secret}\nDATABASE_PATH=./data/law.db\nUPLOAD_DIR=./data/uploads\n# מפתח API של Anthropic — נדרש לניתוח AI של חוות הדעת (https://console.anthropic.com)\nANTHROPIC_API_KEY=\n`)
   console.log('Created .env.local with secure NEXTAUTH_SECRET')
 }
 
@@ -74,6 +74,31 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (case_id) REFERENCES cases(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
+  );
+
+  CREATE TABLE IF NOT EXISTS litigation_profiles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id INTEGER NOT NULL UNIQUE,
+    role TEXT NOT NULL DEFAULT 'plaintiff',
+    area TEXT NOT NULL DEFAULT 'commercial',
+    intake TEXT,
+    facts TEXT,
+    opposing_claim TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (case_id) REFERENCES cases(id)
+  );
+
+  CREATE TABLE IF NOT EXISTS litigation_documents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    profile_id INTEGER NOT NULL,
+    doc_type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    params TEXT,
+    html TEXT NOT NULL,
+    sources TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (profile_id) REFERENCES litigation_profiles(id)
   );
 `)
 

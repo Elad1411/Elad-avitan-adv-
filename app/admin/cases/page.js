@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 const STATUSES = ['פתוח', 'בטיפול', 'ממתין לדיון', 'סגור', 'זוכה', 'הורשע']
@@ -15,7 +16,9 @@ const STATUS_MAP = {
   'זוכה': 'badge-closed', 'הורשע': 'badge-urgent',
 }
 
-export default function AdminCasesPage() {
+function AdminCasesContent() {
+  const searchParams = useSearchParams()
+  const preselectClient = searchParams.get('client')
   const [cases, setCases] = useState([])
   const [clients, setClients] = useState([])
   const [loading, setLoading] = useState(true)
@@ -41,6 +44,14 @@ export default function AdminCasesPage() {
   }
 
   useEffect(() => { fetchData() }, [])
+
+  // הגעה מעמוד לקוח עם ?client=<id> — פתיחת הטופס עם הלקוח מסומן מראש
+  useEffect(() => {
+    if (preselectClient) {
+      setForm(f => ({ ...f, userId: preselectClient }))
+      setShowForm(true)
+    }
+  }, [preselectClient])
 
   const handleCreate = async (e) => {
     e.preventDefault()
@@ -233,5 +244,13 @@ export default function AdminCasesPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function AdminCasesPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-gray-500">טוען...</div>}>
+      <AdminCasesContent />
+    </Suspense>
   )
 }
