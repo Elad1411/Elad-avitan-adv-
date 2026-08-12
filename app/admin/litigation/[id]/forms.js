@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { SOURCE_TYPE_LABELS } from '@/lib/legal-sources'
 import { MOTION_TYPES } from '@/lib/generators'
 
@@ -429,19 +429,23 @@ export function FeeAgreementForm({ profile }) {
 
 /* ===== 5. מחולל חוות דעת ראשונית ===== */
 
-function AiPanel({ profile, endpoint, blurb, button, onApply, warn }) {
+function AiPanel({ profile, endpoint, blurb, button, onApply, warn, factsText, setFactsText, factsLabel }) {
   const [files, setFiles] = useState([])
   const [selected, setSelected] = useState([])
   const [running, setRunning] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [note, setNote] = useState('')
+  const fileInputRef = useRef(null)
 
-  useEffect(() => {
+  const loadFiles = useCallback(() => {
     fetch(`/api/files?caseId=${profile.case_id}`)
       .then(r => r.json())
       .then(d => setFiles(d.files || []))
       .catch(() => {})
   }, [profile.case_id])
+
+  useEffect(() => { loadFiles() }, [loadFiles])
 
   const analyzable = files.filter(f =>
     (f.mime_type || '').startsWith('image/') || f.mime_type === 'application/pdf'
@@ -449,13 +453,41 @@ function AiPanel({ profile, endpoint, blurb, button, onApply, warn }) {
 
   const toggle = (id) => setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id])
 
+  const handleUpload = async (e) => {
+    const list = Array.from(e.target.files || [])
+    if (!list.length) return
+    setError(''); setNote(''); setUploading(true)
+    const newIds = []
+    try {
+      for (const file of list) {
+        const fd = new FormData()
+        fd.append('file', file)
+        fd.append('caseId', profile.case_id)
+        fd.append('uploadedBy', 'admin')
+        const res = await fetch('/api/upload', { method: 'POST', body: fd })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'העלאת הקובץ נכשלה')
+        if (data.id != null) newIds.push(data.id)
+      }
+      loadFiles()
+      // סימון אוטומטי של הקבצים שהועלו כעת לניתוח
+      setSelected(s => [...new Set([...s, ...newIds])])
+      setNote(`${list.length === 1 ? 'הקובץ הועלה' : `${list.length} קבצים הועלו`} וסומנו לניתוח.`)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
   const run = async () => {
     setError(''); setNote(''); setRunning(true)
     try {
       const res = await fetch(`/api/admin/litigation/${profile.id}/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileIds: selected }),
+        body: JSON.stringify({ fileIds: selected, factsText }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'שגיאה בניתוח')
@@ -479,9 +511,35 @@ function AiPanel({ profile, endpoint, blurb, button, onApply, warn }) {
       <p className="text-gray-400 text-xs mb-3">{blurb}</p>
       {warn && <p className="text-red-300/80 text-xs mb-3">{warn}</p>}
 
-      {analyzable.length > 0 && (
+      {typeof factsText === 'string' && setFactsText && (
         <div className="mb-3">
-          <div className="text-gray-500 text-xs mb-1.5">מסמכים/תמונות מהתיק לניתוח (אופציונלי):</div>
+          <div className="text-gray-500 text-xs mb-1.5">{factsLabel || 'תיאור העובדות/המקרה של הלקוח:'}</div>
+          <textarea
+            rows={5} value={factsText} onChange={e => setFactsText(e.target.value)}
+            className="input-dark resize-y text-sm"
+            placeholder="תאר/י את המקרה, השתלשלות האירועים, מה קרה בין הצדדים, סכומים, מועדים..."
+          />
+        </div>
+      )}
+
+      <div className="mb-3">
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="text-gray-500 text-xs">מסמכים/תמונות מהתיק לניתוח (אופציונלי):</div>
+          <div>
+            <input
+              ref={fileInputRef} type="file" multiple
+              accept="image/*,application/pdf"
+              onChange={handleUpload} className="hidden"
+            />
+            <button
+              type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}
+              className="text-xs px-2.5 py-1 rounded-lg border border-gold-500/40 text-gold-300 hover:bg-gold-500/10 disabled:opacity-60"
+            >
+              {uploading ? 'מעלה...' : '＋ העלה קבצים מהלקוח'}
+            </button>
+          </div>
+        </div>
+        {analyzable.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {analyzable.map(f => (
               <label
@@ -497,8 +555,10 @@ function AiPanel({ profile, endpoint, blurb, button, onApply, warn }) {
               </label>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="text-gray-600 text-xs">אין עדיין קבצים לניתוח — ניתן להעלות תכתובות/תמונות/מסמכים מהלקוח.</div>
+        )}
+      </div>
 
       {error && <Notice kind="error">{error}</Notice>}
       {note && <Notice kind="success">{note}</Notice>}
@@ -513,9 +573,10 @@ function AiPanel({ profile, endpoint, blurb, button, onApply, warn }) {
 export function OpinionForm({ profile }) {
   const facts = profile.facts ? JSON.parse(profile.facts) : {}
   const [sourceIds, setSourceIds] = useState([])
+  const [factsText, setFactsText] = useState(facts.chronology || '')
   const [form, set, setForm] = useForm({
     background: facts.chronology || '', legalQuestions: '', strengths: '', weaknesses: '',
-    analysis: '', prospects: 'medium', prospectsReasoning: '', recommendations: '',
+    analysis: '', strategy: '', prospects: 'medium', prospectsReasoning: '', recommendations: '',
   })
 
   const applyAnalysis = (a) => {
@@ -527,10 +588,12 @@ export function OpinionForm({ profile }) {
       weaknesses: a.weaknesses || f.weaknesses,
       analysis: [a.analysis, a.documentObservations ? `\n\nממצאים מהמסמכים/התמונות:\n${a.documentObservations}` : '']
         .filter(Boolean).join(''),
+      strategy: a.strategy || f.strategy,
       prospects: a.prospects || f.prospects,
       prospectsReasoning: a.prospectsReasoning || f.prospectsReasoning,
       recommendations: a.recommendations || f.recommendations,
     }))
+    if (a.background) setFactsText(a.background)
     if (Array.isArray(a.citedSourceIds) && a.citedSourceIds.length) {
       setSourceIds(a.citedSourceIds)
     }
@@ -545,8 +608,10 @@ export function OpinionForm({ profile }) {
       headerExtra={
         <AiPanel
           profile={profile} endpoint="opinion-ai" onApply={applyAnalysis}
+          factsText={factsText} setFactsText={setFactsText}
+          factsLabel="תיאור העובדות/המקרה של הלקוח (יישמר בתיק וישמש בסיס לניתוח):"
           button="✨ נתח אוטומטית ומלא את הטופס"
-          blurb="המערכת תקרא את תיאור העובדות (וכל תמונה/מסמך שתסמן), תעריך סיכויים, תנתח חוזקות וחולשות, תבסס על מקורות משפטיים ותמלא את הטופס. הכל ניתן לעריכה לאחר מכן."
+          blurb="הזן/י את תיאור המקרה של הלקוח והעלה/י תכתובות, תמונות ומסמכים. המערכת תפיק תיאור עובדתי של שני הצדדים, תעריך סיכויים, תגבש אסטרטגיה ראשונית, תנתח חוזקות וחולשות ותבצע ניתוח משפטי מפורט על יסוד מקורות משפטיים אמיתיים — ותמלא את הטופס. הכל ניתן לעריכה לאחר מכן."
         />
       }
       valid={() => {
@@ -556,7 +621,7 @@ export function OpinionForm({ profile }) {
         return true
       }}
     >
-      <Field label="רקע עובדתי *" span={2} hint="נטען אוטומטית מטופס תיאור המקרה — ניתן לערוך">
+      <Field label="רקע עובדתי — גרסאות הצדדים *" span={2} hint="תיאור עובדתי של שני הצדדים — נטען מהניתוח / מטופס תיאור המקרה, ניתן לערוך">
         <textarea required rows={5} value={form.background} onChange={set('background')} className="input-dark resize-none" />
       </Field>
       <Field label="השאלות המשפטיות הטעונות הכרעה *" span={2}>
@@ -566,6 +631,9 @@ export function OpinionForm({ profile }) {
       <Field label="נקודות חולשה וסיכונים"><textarea rows={3} value={form.weaknesses} onChange={set('weaknesses')} className="input-dark resize-none" /></Field>
       <Field label="ניתוח משפטי מפורט" span={2}>
         <textarea rows={4} value={form.analysis} onChange={set('analysis')} className="input-dark resize-none" />
+      </Field>
+      <Field label="אסטרטגיה ראשונית" span={2} hint="דרך ניהול התיק המומלצת על יסוד הניתוח">
+        <textarea rows={3} value={form.strategy} onChange={set('strategy')} className="input-dark resize-none" />
       </Field>
       <Field label="הערכת סיכויים *">
         <select value={form.prospects} onChange={set('prospects')} className="input-dark">

@@ -28,9 +28,15 @@ export async function POST(request, { params }) {
   `).get(id)
   if (!profile) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const { fileIds = [] } = await request.json().catch(() => ({}))
+  const { fileIds = [], factsText } = await request.json().catch(() => ({}))
 
   const facts = profile.facts ? JSON.parse(profile.facts) : {}
+  // תיאור עובדות שהוזן ישירות בפאנל — משמש לניתוח ונשמר בתיק כמקור אחד
+  if (typeof factsText === 'string' && factsText.trim()) {
+    facts.chronology = factsText.trim()
+    db.prepare('UPDATE litigation_profiles SET facts = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+      .run(JSON.stringify(facts), id)
+  }
   const sources = getSourcesForArea(profile.area)
 
   // קבצים לניתוח — רק מתוך תיק הלקוח, לפי הבחירה
