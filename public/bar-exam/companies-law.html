@@ -1,0 +1,957 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important} body{margin:0}</style>
+<title>דיני חברות — מדריך לבחינת הלשכה</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;800&family=Heebo:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a navy hero with search, a sticky chapter rail, then eight chapters of prose with clickable terms, concept cards and one hands-on tool each; every concept opens in a dialog. */
+:root {
+  --bg: #F2F3F5;
+  --surface: #FFFFFF;
+  --surface-2: #E8EBF0;
+  --ink: #14233B;
+  --text: #2C3749;
+  --muted: #5A6475;
+  --line: #D5DAE2;
+  --accent: #8E6219;
+  --accent-strong: #B5852F;
+  --accent-soft: #F3E7CF;
+  --warn: #8C2F3F;
+  --warn-soft: #F6E1E4;
+  --ok: #1D6A4D;
+  --ok-soft: #DDEFE6;
+  --hero-bg: #14233B;
+  --hero-ink: #F4F1EA;
+  --hero-muted: #BCC7D8;
+  --hero-accent: #D9B25F;
+  --scrim: rgba(12, 20, 34, 0.55);
+  --shadow: 0 18px 50px rgba(15, 25, 45, 0.18);
+  --font-display: 'Frank Ruhl Libre', 'David', Georgia, serif;
+  --font-body: 'Heebo', 'Arial Hebrew', Arial, sans-serif;
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1626; --surface: #16213A; --surface-2: #1D2A46; --ink: #EEF1F6; --text: #D2D8E2; --muted: #9AA5B8; --line: #2B3A5A;
+    --accent: #D9B25F; --accent-strong: #E6C57E; --accent-soft: #3A3220; --warn: #EE95A3; --warn-soft: #3B1F28; --ok: #74CFA6; --ok-soft: #173429;
+    --hero-bg: #0A1120; --hero-ink: #F4F1EA; --hero-muted: #A9B5C8; --hero-accent: #D9B25F; --scrim: rgba(0, 0, 0, 0.6); --shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1626; --surface: #16213A; --surface-2: #1D2A46; --ink: #EEF1F6; --text: #D2D8E2; --muted: #9AA5B8; --line: #2B3A5A;
+  --accent: #D9B25F; --accent-strong: #E6C57E; --accent-soft: #3A3220; --warn: #EE95A3; --warn-soft: #3B1F28; --ok: #74CFA6; --ok-soft: #173429;
+  --hero-bg: #0A1120; --hero-ink: #F4F1EA; --hero-muted: #A9B5C8; --hero-accent: #D9B25F; --scrim: rgba(0, 0, 0, 0.6); --shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 17px; line-height: 1.7; }
+.app { direction: rtl; text-align: right; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--font-display); color: var(--ink); line-height: 1.2; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+a { color: var(--accent); }
+button { font: inherit; }
+:focus-visible { outline: 3px solid var(--accent-strong); outline-offset: 2px; border-radius: 4px; }
+
+/* Hero */
+.hero { background: var(--hero-bg); color: var(--hero-ink); }
+.hero .wrap { padding-block: 56px 48px; display: grid; gap: 28px; }
+.eyebrow { font-size: 14px; font-weight: 700; letter-spacing: 0.06em; color: var(--accent); }
+.hero .eyebrow { color: var(--hero-accent); }
+.hero h1 { color: var(--hero-ink); font-size: clamp(44px, 8vw, 84px); font-weight: 800; }
+.hero-sub { color: var(--hero-muted); font-size: 19px; max-width: 60ch; }
+.hero-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+.search { position: relative; flex: 1 1 340px; min-width: 0; max-width: 560px; }
+.search input { width: 100%; font: inherit; font-size: 17px; padding: 14px 18px; border-radius: 12px; border: 1px solid transparent; background: var(--surface); color: var(--text); }
+.search input::placeholder { color: var(--muted); }
+.results { position: absolute; inset-inline: 0; top: calc(100% + 6px); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 6px; z-index: 30; display: grid; gap: 2px; max-height: 360px; overflow-y: auto; }
+.results button { display: grid; gap: 2px; text-align: right; background: none; border: 0; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: var(--text); }
+.results button:hover, .results button.active { background: var(--surface-2); }
+.results b { color: var(--ink); }
+.results small { color: var(--muted); font-size: 14px; }
+.progress-pill { display: flex; align-items: center; gap: 12px; color: var(--hero-muted); font-size: 15px; }
+.bar { width: 140px; height: 8px; border-radius: 99px; background: rgba(255, 255, 255, 0.15); overflow: hidden; }
+.bar span { display: block; height: 100%; width: 0; background: var(--hero-accent); transition: width .3s; }
+.hint { color: var(--hero-muted); font-size: 15px; }
+.hint .term { color: var(--hero-ink); border-bottom-color: var(--hero-accent); }
+.hint .term:hover { color: var(--ink); }
+.results[hidden] { display: none; }
+
+/* Chapter rail */
+.rail { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
+.rail .wrap { display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; scrollbar-width: thin; }
+.rail a { flex: none; text-decoration: none; color: var(--muted); font-size: 15px; font-weight: 500; padding: 6px 12px; border-radius: 99px; white-space: nowrap; }
+.rail a:hover { color: var(--ink); background: var(--surface-2); }
+.rail a.on { color: var(--ink); background: var(--accent-soft); }
+.rail a span { font-variant-numeric: tabular-nums; color: var(--accent); margin-inline-end: 6px; font-weight: 700; }
+
+/* Chapters */
+main .wrap { padding-block: 24px 64px; display: grid; gap: 72px; }
+.chapter { display: grid; gap: 28px; scroll-margin-top: 72px; min-width: 0; }
+.ch-head { display: grid; gap: 8px; border-top: 2px solid var(--ink); padding-top: 22px; }
+.ch-head .row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px; }
+.ch-head h2 { font-size: clamp(30px, 4.5vw, 44px); font-weight: 700; }
+.ch-count { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.intro { font-size: 20px; line-height: 1.85; max-width: 68ch; color: var(--text); }
+.term { background: linear-gradient(var(--accent-soft), var(--accent-soft)) no-repeat 0 100% / 100% 0; border: 0; border-bottom: 2px solid var(--accent-strong); color: var(--ink); font-weight: 600; padding: 0 2px; cursor: pointer; transition: background-size .18s; line-height: inherit; }
+.term:hover { background-size: 100% 100%; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: 14px; }
+.card { position: relative; display: grid; grid-template-rows: auto 1fr auto; gap: 8px; text-align: right; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; cursor: pointer; color: var(--text); transition: transform .15s, border-color .15s, box-shadow .15s; min-width: 0; }
+.card:hover { transform: translateY(-2px); border-color: var(--accent-strong); box-shadow: 0 8px 22px rgba(15, 25, 45, 0.08); }
+.card .ct { display: block; font-size: 18px; font-weight: 700; color: var(--ink); line-height: 1.35; }
+.card .cs { display: block; font-size: 15px; line-height: 1.6; color: var(--muted); }
+.card .foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.sec { font-size: 13px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border-radius: 99px; padding: 2px 10px; white-space: nowrap; }
+.done-mark { font-size: 13px; font-weight: 600; color: var(--ok); }
+
+.tool { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; display: grid; gap: 18px; min-width: 0; }
+.tool-head { display: grid; gap: 4px; }
+.tool h3 { font-size: 24px; }
+.tool .lede { color: var(--muted); font-size: 15px; }
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 15.5px; min-width: 620px; }
+th, td { text-align: right; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; background: var(--surface-2); }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--muted); }
+tr.hot td { background: var(--accent-soft); }
+.route { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.step { background: var(--surface-2); color: var(--ink); border-radius: 6px; padding: 2px 8px; font-size: 14px; font-weight: 500; white-space: nowrap; }
+.step.strong { background: var(--ink); color: var(--surface); }
+.arrow { color: var(--muted); }
+
+.calc { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 16px; }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 14px; font-weight: 600; color: var(--ink); }
+.field .inp { display: flex; align-items: center; gap: 10px; }
+.field input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); }
+.field input[type=number] { width: 72px; font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); font-variant-numeric: tabular-nums; }
+.checks { display: grid; gap: 8px; }
+.check { display: flex; gap: 12px; align-items: flex-start; padding: 10px 14px; border-radius: 10px; background: var(--surface-2); }
+.check .tag { flex: none; font-size: 13px; font-weight: 700; border-radius: 99px; padding: 2px 10px; }
+.tag.yes { background: var(--ok-soft); color: var(--ok); }
+.tag.no { background: var(--warn-soft); color: var(--warn); }
+.verdict { font-family: var(--font-display); font-size: 26px; font-weight: 700; padding: 14px 18px; border-radius: 12px; }
+.verdict.yes { background: var(--ok-soft); color: var(--ok); }
+.verdict.no { background: var(--warn-soft); color: var(--warn); }
+.verdict.mid { background: var(--accent-soft); color: var(--accent); }
+.seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg button { border: 1px solid var(--line); background: var(--bg); color: var(--text); border-radius: 99px; padding: 6px 16px; cursor: pointer; font-size: 15px; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.q-row { display: grid; gap: 8px; }
+.q-row > span { font-weight: 600; color: var(--ink); font-size: 15.5px; }
+
+.quiz { border: 1px dashed var(--accent-strong); border-radius: var(--radius); padding: 18px 22px; background: transparent; }
+.quiz summary { cursor: pointer; font-weight: 700; color: var(--ink); list-style: none; display: grid; gap: 6px; }
+.quiz summary::-webkit-details-marker { display: none; }
+.quiz summary .eyebrow { font-size: 13px; }
+.quiz summary .q { font-weight: 500; color: var(--text); font-size: 17px; }
+.quiz summary .reveal { font-size: 14px; color: var(--accent); font-weight: 600; }
+.quiz[open] summary .reveal { display: none; }
+.quiz .a { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); line-height: 1.8; }
+
+.compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.side { border-radius: 12px; padding: 18px 20px; background: var(--surface-2); display: grid; gap: 10px; align-content: start; }
+.side h4 { margin: 0; font-family: var(--font-display); font-size: 22px; color: var(--ink); }
+.side dl { margin: 0; display: grid; gap: 8px; }
+.side dt { font-size: 13px; font-weight: 700; color: var(--muted); }
+.side dd { margin: 0; }
+
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 12px; counter-reset: s; }
+.stepcard { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--ink); border-radius: 12px; padding: 16px 18px; display: grid; gap: 6px; align-content: start; }
+.stepcard b { font-family: var(--font-display); font-size: 34px; color: var(--accent); line-height: 1; }
+.stepcard h4 { margin: 0; font-size: 18px; color: var(--ink); }
+.stepcard p { font-size: 15px; color: var(--muted); line-height: 1.6; }
+.traps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 12px; }
+.trap { background: var(--surface); border: 1px solid var(--line); border-inline-start: 4px solid var(--warn); border-radius: 12px; padding: 16px 18px; display: grid; gap: 6px; }
+.trap .wrong { color: var(--warn); font-size: 15px; }
+.trap .right { color: var(--ink); }
+
+footer { border-top: 1px solid var(--line); }
+footer .wrap { padding-block: 28px 40px; color: var(--muted); font-size: 14px; display: grid; gap: 6px; }
+
+/* Dialog */
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 50; display: grid; place-items: center; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); animation: fade .18s ease-out; }
+.dialog { direction: rtl; text-align: right; width: min(760px, 100%); max-height: 100%; overflow-y: auto; background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); display: grid; animation: rise .22s ease-out; }
+.d-head { position: sticky; top: 0; background: var(--surface); padding: 22px 26px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 8px; z-index: 1; }
+.d-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.d-chapter { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: 0.05em; }
+.x { border: 0; background: var(--surface-2); color: var(--ink); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px; line-height: 1; flex: none; }
+.d-head h2 { font-size: clamp(28px, 5vw, 38px); }
+.d-sum { font-size: 18px; color: var(--muted); }
+.d-body { padding: 20px 26px; display: grid; gap: 20px; }
+.blk { display: grid; gap: 6px; }
+.blk h5 { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; color: var(--muted); }
+.blk p { line-height: 1.85; }
+.blk.example { background: var(--accent-soft); border-radius: 12px; padding: 16px 18px; }
+.blk.example h5 { color: var(--accent); }
+.blk.exam { border-inline-start: 3px solid var(--ink); padding-inline-start: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 99px; padding: 4px 14px; cursor: pointer; font-size: 15px; }
+.chip:hover { border-color: var(--accent-strong); }
+.d-foot { border-top: 1px solid var(--line); padding: 14px 26px 20px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; }
+.btn { border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 10px; padding: 8px 14px; cursor: pointer; font-size: 15px; font-weight: 500; }
+.btn.learn[aria-pressed="true"] { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+.nav-btns { display: flex; gap: 8px; }
+.law-link { font-size: 14px; }
+@keyframes fade { from { opacity: 0; } }
+@keyframes rise { from { transform: translateY(12px); opacity: 0; } }
+@media (max-width: 560px) {
+  .scrim { place-items: end stretch; padding: 0; padding-top: 48px; }
+  .dialog { border-radius: 18px 18px 0 0; width: 100%; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .d-head, .d-body, .d-foot { padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); }
+  .intro { font-size: 18px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="app" dir="rtl" lang="he">
+  <header class="hero">
+    <div class="wrap">
+      <p class="eyebrow">בחינות לשכת עורכי הדין · מדריך אינטראקטיבי</p>
+      <h1>דיני חברות</h1>
+      <p class="hero-sub">חוק החברות, התשנ״ט-1999, בשפה פשוטה. כל מושג מסומן נפתח בחלון עם הסבר, דוגמה מהחיים וטיפ לבחינה.</p>
+      <div class="hero-row">
+        <div class="search">
+          <input id="q" type="search" placeholder="חפשו מושג: הרמת מסך, רוב מיוחד, תביעה נגזרת…" autocomplete="off" aria-label="חיפוש מושג" aria-controls="results">
+          <div id="results" class="results" role="listbox" hidden></div>
+        </div>
+        <div class="progress-pill" aria-live="polite">
+          <div class="bar"><span id="bar"></span></div>
+          <span id="progress-text"></span>
+        </div>
+      </div>
+      <p class="hint">לחצו על מילה מסומנת כמו <button type="button" class="term" data-c="veil">הרמת מסך</button>, או על כל כרטיס מושג. בחלון אפשר לסמן ״למדתי״ ולעבור למושג הבא.</p>
+    </div>
+  </header>
+
+  <nav class="rail" aria-label="פרקים">
+    <div class="wrap" id="rail"></div>
+  </nav>
+
+  <main>
+    <div class="wrap" id="chapters"></div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>המדריך נועד ללימוד ואינו ייעוץ משפטי. ההסברים מפשטים את החוק; מספרי הסעיפים והנוסחים יש לבדוק מול נוסח החוק העדכני.</p>
+      <p><a href="https://www.nevo.co.il/law_html/law00/71858.htm" target="_blank" rel="noopener">לנוסח חוק החברות באתר נבו</a></p>
+    </div>
+  </footer>
+</div>
+
+<div id="modal-root"></div>
+
+<script>
+const LAW_URL = 'https://www.nevo.co.il/law_html/law00/71858.htm';
+
+const CHAPTERS = [
+  { id: 'ch1', title: 'יסודות', eyebrow: 'פרק 1 · מי היא החברה',
+    intro: `הכול מתחיל בעיקרון אחד: {{personality|החברה היא אישיות משפטית נפרדת}}. יש לה {{capacity|כשרות}} כמעט מלאה, ולבעלי המניות {{limited|אחריות מוגבלת}}. החריג הוא {{veil|הרמת מסך}}, שמופעל רק במקרים קיצוניים. החברה פועלת לפי {{purpose|מטרתה}} ולפי {{articles|התקנון}} שלה.`,
+    concepts: ['personality', 'capacity', 'salomon', 'limited', 'veil', 'subordination', 'purpose', 'donations', 'articles', 'class-rights', 'attribution'],
+    quiz: { q: `דנה מחזיקה בכל המניות של חברה. ימים לפני שהחברה קרסה, היא העבירה את כל הכסף שבחשבון החברה לחשבון הפרטי שלה. האם הספקים שלא קיבלו תשלום יכולים לתבוע את דנה אישית?`,
+      a: `כנראה שכן, אבל לא בגלל שהיא בעלת מניות יחידה. העילה היא {{veil|הרמת מסך}}: דנה השתמשה באישיות הנפרדת כדי לקפח את נושי החברה, היא ידעה על כך, וצודק ונכון לחייב אותה. בתשובה בבחינה צריך להראות כל אחד מהתנאים האלה על העובדות.` } },
+  { id: 'ch2', title: 'אורגנים', eyebrow: 'פרק 2 · מי מחליט',
+    intro: `לחברה שלושה אורגנים עיקריים: {{general-meeting|האסיפה הכללית}}, {{board|הדירקטוריון}} ו{{ceo|המנכ״ל}}. לכל אחד תחום אחר. ב{{public-company|חברה ציבורית}} נוספים שומרי סף: {{external-director|דירקטורים חיצוניים}}, {{audit-committee|ועדת ביקורת}} ו{{comp-committee|ועדת תגמול}}.`,
+    concepts: ['general-meeting', 'board', 'ceo', 'dual-role', 'taking-powers', 'public-company', 'external-director', 'audit-committee', 'comp-committee'],
+    tool: 'organs',
+    quiz: { q: `בחברה ציבורית, המנכ״ל מבקש לכהן גם כיו״ר הדירקטוריון. הדירקטוריון אישר פה אחד. האם זה מספיק?`,
+      a: `לא. {{dual-role|כפל כהונה של יו״ר ומנכ״ל}} בחברה ציבורית טעון אישור של האסיפה הכללית ברוב מיוחד, ולתקופה מוגבלת. ההחלטה של הדירקטוריון לבדה אינה מספיקה, גם אם התקבלה פה אחד.` } },
+  { id: 'ch3', title: 'חובות נושאי משרה', eyebrow: 'פרק 3 · איך ובשביל מי',
+    intro: `כל {{officer|נושא משרה}} חב שתי חובות כלפי החברה: {{care|זהירות}}, כלומר איך החלטת, ו{{loyalty|אמונים}}, כלומר בשביל מי החלטת. ההבחנה ביניהן קובעת אם {{bjr|כלל שיקול הדעת העסקי}} מגן, ואם אפשר לתת {{exemption|פטור}}, {{indemnification|שיפוי}} או {{insurance|ביטוח}}.`,
+    concepts: ['officer', 'care', 'loyalty', 'conflict', 'competition', 'opportunity', 'disclosure', 'safe-harbor', 'bjr', 'exemption', 'indemnification', 'insurance', 'prohibited'],
+    tool: 'duties',
+    quiz: { q: `דירקטור הצביע בעד רכישת חברה בלי לקרוא את חוות הדעת שהונחה לפניו. ההשקעה נכשלה. האם כלל שיקול הדעת העסקי מגן עליו?`,
+      a: `לא. אחד מתנאי הסף של {{bjr|כלל שיקול הדעת העסקי}} הוא החלטה מיודעת, והדירקטור לא אסף מידע סביר. לכן בית המשפט יבחן אם הפר את {{care|חובת הזהירות}}. אם התקנון מתיר {{exemption|פטור}}, ייתכן שהפטור יגן עליו, כי מדובר בזהירות ולא באמונים, וההחלטה אינה על חלוקה.` } },
+  { id: 'ch4', title: 'חובות בעלי מניות', eyebrow: 'פרק 4 · גם לבעלים יש חובות',
+    intro: `גם בעלי מניות חבים חובות. כל בעל מניה חב {{sh-good-faith|תום לב}}. על {{controlling|בעל שליטה}} חלה גם {{fairness|חובת הגינות}}, כולל כשהוא {{control-sale|מוכר את השליטה}}.`,
+    concepts: ['sh-good-faith', 'controlling', 'fairness', 'control-sale'],
+    quiz: { q: `בעל מניות עם 10% מצביע נגד הגדלת הון שהחברה צריכה כדי לשרוד. הוא עושה זאת רק כדי שהאחרים יקנו ממנו את המניות במחיר מופרז. האם זה מותר?`,
+      a: `לא. זהו ניצול כוח לרעה, בניגוד ל{{sh-good-faith|חובת תום הלב}} של בעל מניה. ההצבעה היא על הגדלת הון, אחד העניינים שהחוק מזכיר במפורש. אם בלי הקולות שלו ההחלטה לא יכולה לעבור, הוא גם ״בעל כוח מכריע״ ולכן חב גם {{fairness|חובת הגינות}}.` } },
+  { id: 'ch5', title: 'עסקאות בעלי עניין', eyebrow: 'פרק 5 · מי מאשר מה',
+    intro: `עסקה שבה לאדם בכיר יש {{personal-interest|עניין אישי}} מסוכנת לחברה. ככל שהעסקה {{extraordinary|חריגה}} יותר, וככל שהמעורב חזק יותר, {{approvals|מסלול האישור}} מחמיר, עד {{special-majority|רוב מיוחד}} באסיפה. עסקה שלא אושרה כדין {{invalid-transaction|אינה תקפה}}.`,
+    concepts: ['personal-interest', 'extraordinary', 'approvals', 'special-majority', 'invalid-transaction'],
+    tool: 'approvals',
+    quiz: { q: `חברה ציבורית קונה נכס מחברה פרטית של בעל השליטה, במחיר גבוה ממחיר השוק. איזה אישור נדרש?`,
+      a: `זו {{extraordinary|עסקה חריגה}}, כי אינה בתנאי שוק, ולבעל השליטה יש בה {{personal-interest|עניין אישי}}. לכן נדרשים ועדת ביקורת, אחריה דירקטוריון, ואחריהם אסיפה כללית ב{{special-majority|רוב מיוחד}} (ס׳ 275). אם העסקה לא אושרה כך, היא {{invalid-transaction|אינה תקפה}}.` } },
+  { id: 'ch6', title: 'תרופות והגנת המיעוט', eyebrow: 'פרק 6 · מי נפגע',
+    intro: `לבעל מניה שנפגע יש שתי דרכים עיקריות. אם הוא נפגע ישירות, תביעת {{oppression|קיפוח}}. אם הנזק נגרם לחברה, {{derivative|תביעה נגזרת}}, אחרי {{demand|פנייה מוקדמת}} לחברה.`,
+    concepts: ['oppression', 'derivative', 'demand'],
+    tool: 'remedies',
+    quiz: { q: `המנכ״ל ניצל הזדמנות עסקית של החברה. בעל מניות מיעוט רוצה לתבוע. באיזה הליך?`,
+      a: `הנזק נגרם לחברה, ולכן ההליך הוא {{derivative|תביעה נגזרת}}. קודם {{demand|פונים לחברה}} ודורשים שתתבע בעצמה. אם היא מסרבת או לא עונה, מבקשים מבית המשפט לאשר את התביעה. צריך להראות תום לב ושהתביעה לכאורה לטובת החברה. העילה היא {{opportunity|ניצול הזדמנות עסקית}}.` } },
+  { id: 'ch7', title: 'הון ושינויים מבניים', eyebrow: 'פרק 7 · כסף יוצא, חברות מתמזגות',
+    intro: `כל {{distribution|חלוקה}} חייבת לעבור שני מבחנים: {{profit-test|מבחן הרווח}} ו{{solvency-test|מבחן יכולת הפירעון}}. בית המשפט יכול {{court-distribution|לפטור רק מהראשון}}. הפרק עוסק גם ב{{merger|מיזוג}}, ב{{special-tender|הצעת רכש מיוחדת}} וב{{full-tender|הצעת רכש מלאה}}.`,
+    concepts: ['distribution', 'profit-test', 'solvency-test', 'court-distribution', 'prohibited-distribution', 'merger', 'special-tender', 'full-tender'],
+    tool: 'distribution',
+    quiz: { q: `לחברה הפסדים צבורים, אבל בשנתיים האחרונות היא הרוויחה יפה ויש לה תזרים יציב. האם היא יכולה לחלק דיבידנד?`,
+      a: `כן, ככל הנראה. {{profit-test|מבחן הרווח}} מתקיים, כי מספיק שהיו רווחים בשנתיים האחרונות (לוקחים את הגבוה מבין העודפים לבין רווחי השנתיים). צריך לבדוק גם את {{solvency-test|מבחן יכולת הפירעון}}. תזרים יציב תומך בכך שהוא מתקיים. ההחלטה מתקבלת בדירקטוריון.` } },
+  { id: 'ch8', title: 'חזרה לפני הבחינה', eyebrow: 'פרק 8 · לסגור פינות',
+    intro: `שיטה קבועה לניתוח כל שאלה, ושש טעויות שהמסיחים בשאלות האמריקאיות בנויים עליהן. כל טעות מקושרת למושג שמסביר אותה.`,
+    concepts: [], tool: 'review' }
+];
+
+const C = {};
+function add(id, o) { C[id] = Object.assign({ id }, o); }
+
+/* ---------- פרק 1 ---------- */
+add('personality', { term: 'אישיות משפטית נפרדת', sec: 'ס׳ 4',
+  sum: 'החברה היא ״אדם״ בפני עצמו, נפרד מבעלי המניות שלה.',
+  plain: 'ברגע שחברה נרשמת, היא הופכת לישות משפטית עצמאית. היא יכולה להחזיק נכסים, לחתום על חוזים, לתבוע ולהיתבע, והכול בשמה שלה. החובות של החברה הם שלה, ולא של מי שמחזיק במניות.',
+  ex: 'יוסי מקים את ״פיצה יוסי בע״מ״ ומחזיק בכל המניות. החברה שוכרת חנות ולא משלמת שכר דירה. בעל החנות יכול לתבוע את החברה, אבל ככלל לא את יוסי עצמו, אף שהוא הבעלים היחיד.',
+  tip: 'זו נקודת המוצא בכל שאלה. כדי לחייב את יוסי אישית צריך עילה מיוחדת, למשל הרמת מסך או ערבות אישית שחתם עליה.',
+  rel: ['salomon', 'limited', 'veil'] });
+add('capacity', { term: 'כשרות החברה', sec: 'ס׳ 4',
+  sum: 'החברה רשאית לעשות כל פעולה שמתאימה לתאגיד.',
+  plain: 'החוק נותן לחברה כשרות כמעט מלאה: כל זכות, חובה ופעולה, חוץ ממה שלא מתאים לטבעה כתאגיד (חברה לא יכולה להתחתן או להצביע בבחירות). פעם, פעולה שחרגה מהמטרות שבמסמכי החברה הייתה עלולה להיות בטלה. היום הכשרות רחבה, ומגבלה בתקנון היא בעיקר עניין פנימי.',
+  ex: 'בתקנון של חברת הייטק כתוב שמטרתה ״פיתוח תוכנה״. החברה קונה דירה להשקעה. הקנייה תקפה כלפי המוכר. אם הדירקטורים חרגו ממה שבעלי המניות הסכימו, זו שאלה של האחריות שלהם כלפי החברה.',
+  tip: 'אל תכתבו שפעולה ״בטלה כי היא חורגת מהמטרות״. בדקו במקום זאת את האחריות של נושאי המשרה כלפי החברה.',
+  rel: ['personality', 'purpose', 'articles'] });
+add('salomon', { term: 'הלכת סלומון', sec: 'בית הלורדים, 1897',
+  sum: 'גם חברה של אדם אחד היא ישות נפרדת ממנו.',
+  plain: 'סלומון מכר את העסק שלו לחברה שהקים, והחברה נשארה חייבת לו כסף בהלוואה מובטחת. כשהחברה קרסה, הנושים טענו שהחברה היא בעצם סלומון עצמו. בית הלורדים האנגלי קבע שהחברה נרשמה כדין, ולכן היא אדם נפרד, גם אם אדם אחד שולט בה לגמרי. ההלכה היא הבסיס לדין הישראלי.',
+  ex: 'רונית מחזיקה 100% מ״רונית עיצובים בע״מ״ וגם הלוותה לה כסף. כשהחברה בקשיים, רונית יכולה לדרוש את ההלוואה כמו כל נושה. ייתכן שבית המשפט ידחה את החוב שלה לסוף התור (כפיפות חוב).',
+  tip: 'שליטה מלאה לבדה אינה סיבה להתעלם מהאישיות הנפרדת.',
+  rel: ['personality', 'veil', 'subordination'] });
+add('limited', { term: 'אחריות מוגבלת', sec: 'חברה בע״מ',
+  sum: 'בעל המניות מסכן רק את מה שהשקיע במניות.',
+  plain: 'בחברה בע״מ, ההפסד המרבי של בעל מניות הוא הכסף שהתחייב לשלם בעד המניות שלו. אם לחברה יש חובות גדולים מזה, הנושים לא יכולים לגבות את ההפרש מהבית או מהחשבון הפרטי של בעל המניות.',
+  ex: 'מיכל השקיעה 50,000 ₪ במניות. החברה נכשלה עם חובות של מיליון ₪. מיכל מפסידה את ה-50,000 ₪, אבל לא חייבת לשלם את חובות החברה.',
+  tip: 'יש שלושה חריגים: ערבות אישית שבעל המניות חתם עליה, הרמת מסך, ואחריות אישית בנזיקין על מעשה שעשה בעצמו.',
+  rel: ['personality', 'veil'] });
+add('veil', { term: 'הרמת מסך', sec: 'ס׳ 6',
+  sum: 'מקרה חריג שבו בית המשפט מחייב בעל מניה בחוב של החברה.',
+  plain: 'בית המשפט יכול ״להרים את המסך״ שמפריד בין החברה לבעלי המניות, ולחייב בעל מניה בחוב של החברה. זה קורה רק במקרים חריגים, כשצודק ונכון לעשות זאת, ובאחת משתי חלופות. (א) השימוש בחברה נועד להונות מישהו או לקפח נושה. (ב) השימוש פגע בתכלית החברה, תוך נטילת סיכון בלתי סביר לגבי היכולת שלה לשלם את חובותיה. בשתי החלופות בעל המניה היה צריך להיות מודע לשימוש הזה. בית המשפט מתחשב גם בכמה מניות יש לו, ובשאלה אם קיים את חובותיו כבעל מניה. הסעיף מאפשר גם לייחס תכונה, זכות או חובה מהחברה לבעל המניה או להפך, כשזה נדרש כדי לא לסכל את הכוונה של חוק או של חוזה.',
+  ex: 'החברה של אבי לא שילמה לספקים. ערב הקריסה הוא מעביר את כל הכסף והמלאי לחברה חדשה שבבעלותו, ומשאיר את החברה הישנה ריקה. בית המשפט עשוי לחייב את אבי בחוב לספקים: הוא השתמש בחברה כדי לקפח נושים, וידע שהוא עושה זאת.',
+  tip: 'מבנה תשובה: (1) מי בעל המניה ומה עשה; (2) איזו חלופה מתקיימת; (3) הוכחת מודעות; (4) למה צודק ונכון. אל תסתפקו ב״הוא בעל מניות יחיד״. הלכה קלאסית מלפני החוק: ע״א 4606/90 מוברמן נ׳ תל מר.',
+  rel: ['personality', 'salomon', 'subordination', 'sh-good-faith'] });
+add('subordination', { term: 'כפיפות חוב', sec: 'ס׳ 6(ג)',
+  sum: 'חוב של החברה לבעל המניה ייפרע רק אחרי שאר הנושים.',
+  plain: 'כשחברה נכנסת להליך חדלות פירעון, בית המשפט יכול לקבוע שהלוואה שבעל מניה נתן לחברה תיפרע רק אחרי שכל הנושים האחרים קיבלו את כספם. הרעיון: בעל מניה שכמעט לא השקיע הון בחברה, ומימן אותה בעיקר בהלוואות, לא יתחרה בספקים ובעובדים על אותו כסף.',
+  ex: 'שני שותפים הקימו חברה עם הון של 100 ₪ והלוו לה 2 מיליון ₪. בחדלות הפירעון הם מבקשים להיפרע יחד עם הספקים. בית המשפט עשוי לדחות את החוב שלהם לסוף התור.',
+  tip: 'ההוראות על חדלות פירעון עודכנו בחוק חדלות פירעון ושיקום כלכלי, התשע״ח-2018. בדקו את הנוסח העדכני של הסעיף.',
+  rel: ['veil', 'salomon'] });
+add('purpose', { term: 'מטרת החברה', sec: 'ס׳ 11(א)',
+  sum: 'לפעול לפי שיקולים עסקיים כדי להגדיל את הרווחים.',
+  plain: 'המטרה הבסיסית של חברה היא להרוויח. במסגרת השיקולים העסקיים, החוק מאפשר לה להתחשב גם בנושים, בעובדים ובציבור. כלומר, מותר לחשוב על הטווח הארוך ועל המוניטין, כל עוד יש לזה היגיון עסקי.',
+  ex: 'רשת סופרמרקטים מחליטה להשקיע בהכשרת עובדים ובמיחזור, אף שזה מקטין את הרווח השנה. ההחלטה לגיטימית: היא משפרת את שימור העובדים ואת התדמית, ואלה שיקולים עסקיים לטווח ארוך.',
+  tip: 'בשאלה על החלטה ״חברתית״, בדקו קודם אם אפשר לקשור אותה לשיקול עסקי. אם לא, עברו לכללי התרומות.',
+  rel: ['donations', 'capacity'] });
+add('donations', { term: 'תרומות', sec: 'ס׳ 11(ב)',
+  sum: 'מותר לתרום סכום סביר למטרה ראויה, אם התקנון מתיר זאת.',
+  plain: 'חברה יכולה לתרום גם כשאין בתרומה תועלת עסקית, בשלושה תנאים: יש בתקנון הוראה שמתירה תרומות, הסכום סביר, והמטרה ראויה.',
+  ex: 'חברה קטנה עם רווח שנתי של מיליון ₪ תורמת 20,000 ₪ לעמותה לילדים בסיכון. אם התקנון מתיר, זה מותר. תרומה של 800,000 ₪ כנראה אינה ״סכום סביר״.',
+  tip: 'בדקו כל אחד משלושת התנאים בנפרד: הוראה בתקנון, סכום סביר, מטרה ראויה.',
+  rel: ['purpose', 'articles'] });
+add('articles', { term: 'תקנון', sec: 'ס׳ 20 (שינוי)',
+  sum: 'מסמך היסוד של החברה, ה״חוקה״ הפנימית שלה.',
+  plain: 'התקנון קובע את הכללים הפנימיים: סוגי המניות, איך ממנים דירקטורים ומי מחליט על מה. הוא מחייב את החברה ואת בעלי המניות, וגם את בעלי המניות זה כלפי זה, כמו חוזה. בחברה חדשה זה מסמך היסוד היחיד. בחברות ותיקות ייתכן שיש גם תזכיר. שינוי התקנון נעשה ככלל באסיפה הכללית ברוב רגיל. הוראה מחייבת בחוק גוברת על הוראה סותרת בתקנון.',
+  ex: 'בתקנון נקבע שכל מי שמחזיק 20% ממנה דירקטור אחד. בעל השליטה רוצה לבטל את ההוראה. ככלל הוא יכול לשנות את התקנון ברוב רגיל, אבל עליו לנהוג בתום לב ולא לקפח את המיעוט.',
+  tip: 'לפני שקובעים איזה רוב נדרש, בדקו אם התקנון עצמו קבע רוב אחר, ואם השינוי פוגע בסוג מסוים של מניות.',
+  rel: ['class-rights', 'sh-good-faith', 'oppression'] });
+add('class-rights', { term: 'זכויות סוג ואסיפת סוג', sec: 'אסיפת סוג',
+  sum: 'שינוי שפוגע בסוג מניות מסוים דורש גם את הסכמת אותו סוג.',
+  plain: 'לחברה יכולים להיות כמה סוגי מניות, למשל מניות רגילות ומניות בכורה שמקבלות דיבידנד ראשונות. כדי לשנות את הזכויות של סוג מסוים, לא מספיק רוב באסיפה הכללית. צריך גם אישור של אסיפת בעלי המניות מאותו סוג.',
+  ex: 'קרן השקעות מחזיקה מניות בכורה עם זכות לדיבידנד של 8%. בעלי המניות הרגילות רוצים לבטל את הזכות. הם צריכים גם את האישור של אסיפת בעלי מניות הבכורה.',
+  tip: 'כשבשאלה מופיעות ״מניות בכורה״ או ״מניות סוג ב׳״, זה רמז לבדוק אם נדרשת אסיפת סוג.',
+  rel: ['articles', 'general-meeting'] });
+add('attribution', { term: 'ייחוס פעולה לחברה', sec: 'ס׳ 47',
+  sum: 'מה שהאורגן עושה או יודע נחשב כאילו החברה עשתה או ידעה.',
+  plain: 'לחברה אין ידיים או מוח משלה. לכן החוק קובע שפעולה, ידיעה או כוונה של אורגן (האסיפה, הדירקטוריון או המנכ״ל) הן של החברה עצמה. פעולה של עובד או של שלוח מיוחסת לחברה לפי דיני השליחות.',
+  ex: 'המנכ״ל ידע שהמוצר פגום ובכל זאת מכר אותו. מבחינה משפטית החברה ״ידעה״, ואפשר לטעון נגדה להטעיה.',
+  tip: 'הבחינו בין אורגן (ייחוס ישיר) לבין שלוח (דיני השליחות).',
+  rel: ['general-meeting', 'board', 'ceo'] });
+
+/* ---------- פרק 2 ---------- */
+add('general-meeting', { term: 'האסיפה הכללית', sec: 'אורגן',
+  sum: 'בעלי המניות, כשהם מתכנסים כדי להחליט.',
+  plain: 'האסיפה הכללית היא ה״פרלמנט״ של בעלי המניות. היא מקבלת את ההחלטות היסודיות: שינוי תקנון, מינוי דירקטורים (כברירת מחדל), מינוי רואה החשבון המבקר, אישור מיזוג, ואישור עסקאות מסוימות עם בעל השליטה. כל מניה רגילה נותנת ככלל קול אחד.',
+  ex: 'בעלי המניות בחברה משפחתית מתכנסים פעם בשנה באסיפה השנתית כדי לדון בדוחות ולמנות דירקטורים. כשצריך להחליט על מיזוג באמצע השנה, מכנסים אסיפה מיוחדת.',
+  tip: 'שאלה טיפוסית: האסיפה קיבלה החלטה ניהולית שוטפת. בדקו אם הייתה לה סמכות, או שנטלה את הסמכות כדין.',
+  rel: ['board', 'taking-powers', 'articles'] });
+add('board', { term: 'הדירקטוריון', sec: 'ס׳ 92',
+  sum: 'מתווה את המדיניות ומפקח על ההנהלה.',
+  plain: 'הדירקטוריון הוא מועצת המנהלים. הוא לא מנהל את היום-יום, אלא קובע את הכיוון: תוכניות פעולה, מקורות מימון ומבנה ארגוני. הוא ממנה את המנכ״ל ומפטר אותו ומפקח עליו. הוא גם מאשר את הדוחות הכספיים ומחליט על חלוקת דיבידנד.',
+  ex: 'המנכ״ל מציע לפתוח סניף בחו״ל בעלות של 30 מיליון ₪. הדירקטוריון דן, מבקש תחזית ומחליט, וזו קביעת מדיניות. הבחירה בספק הריהוט לסניף היא כבר ניהול שוטף של המנכ״ל.',
+  tip: 'כל דירקטור חב באופן אישי את חובות הזהירות והאמונים כלפי החברה.',
+  rel: ['ceo', 'care', 'loyalty', 'distribution'] });
+add('ceo', { term: 'המנכ״ל', sec: 'ס׳ 121',
+  sum: 'אחראי לניהול השוטף, בתוך המדיניות שקבע הדירקטוריון.',
+  plain: 'המנהל הכללי מנהל את החברה ביום-יום: עובדים, ספקים, לקוחות ותפעול שוטף. הוא פועל בתוך המדיניות של הדירקטוריון ובפיקוחו. סמכויות ניהול שהחוק או התקנון לא נתנו לאורגן אחר נתונות לו.',
+  ex: 'המנכ״ל של רשת בתי קפה מחליט על מבצע ״1+1״ בסניפים. זה ניהול שוטף בסמכותו. אם ירצה למכור חצי מהסניפים, זה כבר עניין לדירקטוריון.',
+  tip: 'בדקו אם ההחלטה בשאלה היא ״ניהול שוטף״ או ״מדיניות״. זה קובע מי היה מוסמך.',
+  rel: ['board', 'dual-role'] });
+add('dual-role', { term: 'כפל כהונה: יו״ר ומנכ״ל', sec: 'ס׳ 121(ג)',
+  sum: 'בחברה ציבורית אדם אחד לא יהיה גם יו״ר וגם מנכ״ל, אלא באישור מיוחד.',
+  plain: 'היו״ר מוביל את הדירקטוריון, ותפקיד הדירקטוריון הוא לפקח על המנכ״ל. אם אותו אדם ממלא את שני התפקידים, הוא בעצם מפקח על עצמו. לכן בחברה ציבורית כפל כזה מותר רק באישור האסיפה הכללית ברוב מיוחד, ולתקופה מוגבלת.',
+  ex: 'בעל השליטה בחברה ציבורית מכהן כיו״ר ורוצה למנות את עצמו גם למנכ״ל. החלטת דירקטוריון לבדה אינה מספיקה. נדרש אישור של האסיפה ברוב שכולל את המיעוט.',
+  tip: 'מלכודת נפוצה: ״הדירקטוריון אישר פה אחד״. זה עדיין לא מספיק.',
+  rel: ['ceo', 'board', 'special-majority'] });
+add('taking-powers', { term: 'נטילת סמכויות', sec: 'ס׳ 50–52',
+  sum: 'במצבים מסוימים האסיפה לוקחת לעצמה סמכויות של אורגן אחר.',
+  plain: 'חלוקת הסמכויות בין האורגנים אינה מוחלטת. התקנון יכול לקבוע שהאסיפה הכללית תיטול סמכויות של אורגן אחר. ואם הדירקטוריון אינו יכול לפעול, למשל כי אין מניין חוקי או כי לרוב הדירקטורים יש ניגוד עניינים, האסיפה יכולה להפעיל את סמכויותיו.',
+  ex: 'כל חברי הדירקטוריון מעורבים בעסקה שעומדת לאישור, ולכן אינם יכולים להחליט עליה. האסיפה הכללית מתכנסת ומחליטה במקומם.',
+  tip: 'בדקו בנוסח הסעיפים מי רשאי ליטול סמכות, באילו תנאים ולכמה זמן.',
+  rel: ['general-meeting', 'board'] });
+add('public-company', { term: 'חברה ציבורית', sec: 'ס׳ 1',
+  sum: 'חברה שמניותיה נסחרות בבורסה או הוצעו לציבור בתשקיף.',
+  plain: 'חברה פרטית שייכת בדרך כלל לקבוצה קטנה של אנשים. חברה ציבורית גייסה כסף מהציבור, ולכן החוק מוסיף עליה שכבות הגנה: דירקטורים חיצוניים, ועדת ביקורת, ועדת תגמול ומסלולי אישור מחמירים. חברה שרק אגרות החוב שלה נסחרות (״חברת אג״ח״) כפופה לחלק מהכללים האלה.',
+  ex: 'לחברת סטארט-אפ יש 5 בעלי מניות, והיא פרטית. ביום שהיא מנפיקה מניות בבורסה בתל אביב, היא הופכת לציבורית וחייבת למנות דירקטורים חיצוניים.',
+  tip: 'הצעד הראשון בכל שאלה: האם החברה פרטית או ציבורית? חלק גדול מהתשובה תלוי בזה.',
+  rel: ['external-director', 'audit-committee', 'comp-committee', 'approvals'] });
+add('external-director', { term: 'דירקטור חיצוני (דח״צ)', sec: 'ס׳ 239–249',
+  sum: 'דירקטור עצמאי ששומר על האינטרס של כלל בעלי המניות.',
+  plain: 'בחברה ציבורית חייבים לכהן לפחות שני דירקטורים חיצוניים. אסור שתהיה להם זיקה לחברה או לבעל השליטה. הם מתמנים באסיפה הכללית ברוב שכולל את קולות המיעוט, כדי שבעל השליטה לא יבחר אותם לבד. כל תקופת כהונה היא 3 שנים.',
+  ex: 'בעל השליטה רוצה למנות את רואה החשבון הפרטי שלו לדירקטור חיצוני. זה פסול, כי יש לו זיקה לבעל השליטה.',
+  tip: 'שאלות על דח״צים בודקות בדרך כלל שלושה דברים: זיקה, אופן המינוי והרכב הוועדות.',
+  rel: ['public-company', 'audit-committee', 'comp-committee'] });
+add('audit-committee', { term: 'ועדת ביקורת', sec: 'ס׳ 114–117',
+  sum: 'ועדת דירקטוריון שמאתרת ליקויים ומאשרת עסקאות בעלי עניין.',
+  plain: 'בחברה ציבורית חייבת לפעול ועדת ביקורת: לפחות 3 חברים, כל הדירקטורים החיצוניים חברים בה, והיו״ר שלה הוא דירקטור חיצוני. אסור שבעל השליטה או קרובו יהיו חברים בה. הוועדה מאתרת ליקויים בניהול ומאשרת עסקאות שיש בהן עניין אישי.',
+  ex: 'החברה רוצה לשכור משרדים בבניין של בעל השליטה. לפני הדירקטוריון, העסקה עוברת בוועדת הביקורת, שבודקת אם המחיר הוגן.',
+  tip: 'אם הוועדה הורכבה שלא כדין, האישור שלה פגום. תמיד בדקו את ההרכב.',
+  rel: ['external-director', 'approvals', 'extraordinary'] });
+add('comp-committee', { term: 'ועדת תגמול ומדיניות תגמול', sec: 'ס׳ 118א, 267א',
+  sum: 'קובעת את מסגרת השכר של הבכירים ומאשרת תנאי כהונה.',
+  plain: 'ועדת התגמול ממליצה על ״מדיניות תגמול״, מסמך שקובע כמה ובאילו תנאים מותר לשלם לנושאי משרה. המדיניות מאושרת בדירקטוריון ובאסיפה ועולה לאישור מחדש כל 3 שנים. אחר כך כל חבילת שכר של נושא משרה נבחנת מול המדיניות.',
+  ex: 'מדיניות התגמול מגבילה בונוס שנתי ל-6 משכורות. הדירקטוריון רוצה לתת למנכ״ל בונוס של 12 משכורות. זו חריגה מהמדיניות, ונדרש מסלול אישור מחמיר.',
+  tip: 'ועדת התגמול נוספה בתיקון 20 לחוק (2012). בשאלות על שכר בכירים, חפשו קודם את מדיניות התגמול.',
+  rel: ['approvals', 'external-director'] });
+
+/* ---------- פרק 3 ---------- */
+add('officer', { term: 'נושא משרה', sec: 'ס׳ 1',
+  sum: 'דירקטור, מנכ״ל ובכירים, לפי התפקיד ולא לפי התואר.',
+  plain: '״נושא משרה״ כולל דירקטור, מנהל כללי, משנה למנכ״ל, סמנכ״ל, וכל מי שממלא תפקיד כזה גם אם התואר שלו שונה. גם מנהל שכפוף ישירות למנכ״ל הוא נושא משרה. נושאי משרה חבים את חובות הזהירות והאמונים.',
+  ex: '״ראש תחום אסטרטגיה״ כפוף ישירות למנכ״ל ומקבל החלטות מהותיות. הוא נושא משרה, אף שהתואר שלו אינו ״סמנכ״ל״.',
+  tip: 'החובות שבסעיפים 252–254 חלות רק על נושאי משרה. ודאו קודם שהאדם בשאלה הוא נושא משרה.',
+  rel: ['care', 'loyalty'] });
+add('care', { term: 'חובת זהירות', sec: 'ס׳ 252',
+  sum: 'לפעול כמו נושא משרה סביר: במיומנות, ואחרי שאסף מידע.',
+  plain: 'נושא משרה צריך לפעול ברמת המיומנות שבה היה פועל נושא משרה סביר באותן נסיבות. זה כולל איסוף מידע סביר לפני החלטה: לקרוא את החומרים, לשאול שאלות ולבקש חוות דעת. הפרת החובה היא בעצם רשלנות, וחלים עליה דיני הנזיקין.',
+  ex: 'הדירקטוריון אישר רכישת חברה ב-50 מיליון ₪ בישיבה של 20 דקות, בלי בדיקת נאותות ובלי לקרוא את חוות הדעת. העסקה נכשלה. סביר שהדירקטורים הפרו את חובת הזהירות.',
+  tip: 'זהירות היא שאלה של איך החלטת. בודקים את התהליך, לא את התוצאה, כי גם החלטה טובה יכולה להיכשל.',
+  rel: ['bjr', 'loyalty', 'exemption'] });
+add('loyalty', { term: 'חובת אמונים', sec: 'ס׳ 254, 256',
+  sum: 'לפעול בתום לב ורק לטובת החברה.',
+  plain: 'נושא משרה חייב להיות נאמן לחברה: לפעול בתום לב ולטובתה, ולא לטובת עצמו או של מישהו אחר. החוק מונה ארבעה ענפים: הימנעות מניגוד עניינים, הימנעות מתחרות, איסור ניצול הזדמנות עסקית של החברה, וחובת גילוי. על הפרה חלים דיני החוזים, ונושא המשרה צריך גם להחזיר את מה שהרוויח (ס׳ 256).',
+  ex: 'סמנכ״ל רכש מזמין חומרי גלם מחברה שאשתו מחזיקה בה, בלי לספר לאיש. גם אם המחיר סביר, זו הפרת חובת אמונים.',
+  tip: 'אמונים היא שאלה של בשביל מי החלטת. ההפרה חמורה יותר: אין עליה פטור, וכלל שיקול הדעת העסקי לא חל.',
+  rel: ['conflict', 'competition', 'opportunity', 'disclosure', 'safe-harbor'] });
+add('conflict', { term: 'ניגוד עניינים', sec: 'ס׳ 254(א)(1)',
+  sum: 'כשהתפקיד בחברה מתנגש באינטרס אישי או בתפקיד אחר.',
+  plain: 'נושא משרה חייב להימנע ממצב שבו הוא עלול להעדיף את עצמו, קרוב משפחה, או חברה אחרת שהוא מכהן בה, על פני החברה. לפעמים פעולה כזו בכל זאת מותרת, אם מתקיימים תנאי ההכשר שבס׳ 255 והיא אושרה כדין.',
+  ex: 'דירקטור בחברת נדל״ן מכהן גם כדירקטור בחברה מתחרה שמתמודדת על אותו מכרז. הוא בניגוד עניינים, וצריך לגלות את זה ולא להשתתף בדיון.',
+  tip: 'ניגוד עניינים הוא גם ״עניין אישי״, ולכן הוא מפעיל את מסלולי האישור של ס׳ 270 ואילך.',
+  rel: ['loyalty', 'safe-harbor', 'personal-interest'] });
+add('competition', { term: 'איסור תחרות', sec: 'ס׳ 254(א)(2)',
+  sum: 'נושא משרה לא יתחרה בעסקי החברה.',
+  plain: 'נושא משרה לא יכול לפתוח או לנהל עסק שמתחרה בחברה שלו. הוא מכיר את הסודות, הלקוחות והתוכניות שלה, ולכן תחרות מצדו פוגעת בה במיוחד.',
+  ex: 'המנכ״ל של רשת מכוני כושר פותח ״בצד״ סטודיו פילאטיס באותה עיר ומפעיל אותו בערבים. זו תחרות בעסקי החברה.',
+  tip: 'בדקו אם הפעילות באמת באותו תחום ובאותו שוק. לא כל עסק צדדי הוא תחרות.',
+  rel: ['loyalty', 'opportunity'] });
+add('opportunity', { term: 'הזדמנות עסקית', sec: 'ס׳ 254(א)(3)',
+  sum: 'אסור לקחת לעצמך עסקה שהייתה צריכה להגיע לחברה.',
+  plain: 'אם הזדמנות עסקית קשורה לתחום של החברה, או שהגיעה לנושא המשרה בגלל התפקיד שלו, היא שייכת לחברה. נושא המשרה לא יכול לנצל אותה לטובתו או לטובת אחרים. הדרך הנכונה היא להציג אותה לחברה, ולפעול בה בעצמו רק אם החברה דחתה אותה כדין.',
+  ex: 'חברה שמפעילה בתי מלון מחפשת קרקע באילת. המנכ״ל שומע מחבר על קרקע מתאימה וקונה אותה בעצמו. הוא ניצל הזדמנות עסקית של החברה.',
+  tip: 'שאלו שתי שאלות: האם ההזדמנות שייכת לחברה? והאם היא הוצעה לחברה ונדחתה בהליך תקין?',
+  rel: ['loyalty', 'derivative', 'competition'] });
+add('disclosure', { term: 'חובת גילוי', sec: 'ס׳ 254(א)(4)',
+  sum: 'למסור לחברה כל מידע חשוב שהגיע אליך בגלל התפקיד.',
+  plain: 'נושא משרה חייב להעביר לחברה מידע ומסמכים שנוגעים לענייניה ושהגיעו אליו מכוח תפקידו. אסור לו להסתיר מידע שהחברה צריכה כדי להחליט.',
+  ex: 'סמנכ״ל הכספים יודע שלקוח גדול עומד לפשוט רגל, אבל לא מספר לדירקטוריון לפני שהוא מאשר ללקוח אשראי נוסף. זו הפרת חובת הגילוי.',
+  tip: 'כשיש עניין אישי, חלה גם חובת גילוי מיוחדת לפי ס׳ 269: לגלות בלי דיחוי ולפני האישור.',
+  rel: ['loyalty', 'personal-interest'] });
+add('safe-harbor', { term: 'הכשר פעולה', sec: 'ס׳ 255',
+  sum: 'פעולה בניגוד עניינים יכולה להיות מותרת, בתנאים מצטברים.',
+  plain: 'החוק לא אוסר כל עסקה שיש בה עניין אישי. פעולה כזו מותרת אם: (1) נושא המשרה פעל בתום לב; (2) הפעולה אינה פוגעת בטובת החברה; (3) הוא גילה לחברה את עניינו ואת העובדות המהותיות זמן סביר לפני האישור; (4) הפעולה אושרה לפי כללי עסקאות בעלי עניין.',
+  ex: 'דירקטורית רוצה למכור לחברה תוכנה שפיתחה, במחיר שוק. היא מגלה מראש, לא משתתפת בדיון, והעסקה עוברת בוועדת הביקורת ובדירקטוריון. העסקה מותרת.',
+  tip: 'כל התנאים מצטברים. אם חסר אחד, הפעולה אסורה.',
+  rel: ['conflict', 'approvals'] });
+add('bjr', { term: 'כלל שיקול הדעת העסקי', sec: 'ע״א 7735/14 ורדניקוב',
+  sum: 'בית המשפט לא שופט את ההחלטה העסקית, רק את הדרך שבה התקבלה.',
+  plain: 'שופטים אינם אנשי עסקים, ואין רצון שדירקטורים יפחדו לקחת סיכונים. לכן, אם ההחלטה התקבלה בלי ניגוד עניינים, בתום לב, ואחרי איסוף מידע סביר, בית המשפט לא יבדוק אם היא הייתה חכמה. אם אחד התנאים חסר, בית המשפט בודק את ההחלטה לעומק. בית המשפט העליון אימץ את הכלל בע״א 7735/14 ורדניקוב נ׳ אלוביץ.',
+  ex: 'הדירקטוריון שקל בשלוש ישיבות, בליווי יועצים, השקעה בשוק חדש. ההשקעה נכשלה. בית המשפט לא יקבע שהיה צריך להחליט אחרת, כי ההליך היה תקין.',
+  tip: 'הכלל לא חל כשיש ניגוד עניינים, למשל בעסקה עם בעל השליטה. שם בודקים את הגינות העסקה.',
+  rel: ['care', 'loyalty'] });
+add('exemption', { term: 'פטור', sec: 'ס׳ 259',
+  sum: 'החברה מוותרת מראש על תביעה נגד נושא משרה על רשלנות.',
+  plain: 'חברה יכולה לפטור נושא משרה מראש מאחריות כלפיה בשל הפרת חובת הזהירות, אבל רק אם יש לכך הוראה בתקנון. אי אפשר לפטור מאחריות להחלטה על חלוקה, כמו דיבידנד, ואי אפשר לפטור מהפרת חובת האמונים.',
+  ex: 'התקנון מתיר פטור. דירקטור אישר ברשלנות עסקה שהפסידה כסף לחברה, והפטור מגן עליו. אילו ההחלטה הרשלנית הייתה חלוקת דיבידנד אסורה, הפטור לא היה חל.',
+  tip: 'פטור הוא ויתור של החברה עצמה. הוא לא מגן מפני תביעה של צד שלישי; לשם כך יש שיפוי וביטוח.',
+  rel: ['indemnification', 'insurance', 'prohibited', 'care'] });
+add('indemnification', { term: 'שיפוי', sec: 'ס׳ 260',
+  sum: 'החברה מחזירה לנושא המשרה כסף ששילם בגלל תפקידו.',
+  plain: 'שיפוי הוא התחייבות של החברה לשלם במקום נושא המשרה: חבות כספית שהוטלה עליו כלפי צד שלישי, והוצאות משפט. אפשר לשפות בדיעבד. אפשר גם להתחייב מראש, אבל אז רק לסוגי אירועים שהדירקטוריון צופה מראש, ובסכום או לפי אמת מידה סבירים.',
+  ex: 'משקיעים תבעו את המנכ״ל על דיווח מטעה, והוא שילם 300,000 ₪ הוצאות משפט. החברה התחייבה מראש לשפות על תביעות ניירות ערך עד תקרה סבירה, ולכן היא מחזירה לו את הסכום.',
+  tip: 'שיפוי מראש ״על הכול, בלי תקרה״ אינו תקין.',
+  rel: ['exemption', 'insurance', 'prohibited'] });
+add('insurance', { term: 'ביטוח אחריות', sec: 'ס׳ 261',
+  sum: 'החברה רוכשת ביטוח שמכסה את נושא המשרה.',
+  plain: 'החברה יכולה לבטח נושא משרה מפני: הפרת חובת זהירות; הפרת חובת אמונים, רק אם פעל בתום לב והיה לו בסיס סביר להניח שהפעולה לא תפגע בחברה; וחבות כספית כלפי צד שלישי.',
+  ex: 'החברה רוכשת פוליסת ביטוח לדירקטורים ולנושאי משרה בכיסוי של 20 מיליון ₪. כשהדירקטורים נתבעים על החלטה רשלנית, הפוליסה משלמת.',
+  tip: 'ביטוח הוא הכלי היחיד שיכול לכסות גם הפרת אמונים, ורק כשנושא המשרה פעל בתום לב.',
+  rel: ['exemption', 'indemnification', 'prohibited'] });
+add('prohibited', { term: 'מה אסור לכסות', sec: 'ס׳ 263',
+  sum: 'אין פטור, שיפוי או ביטוח למעשים חמורים.',
+  plain: 'החוק אוסר לכסות: הפרת חובת אמונים (חוץ מהחריג של ביטוח בתום לב); הפרת חובת זהירות שנעשתה בכוונה או בפזיזות; פעולה שנועדה להפיק רווח שלא כדין; וקנס או כופר שהוטלו על נושא המשרה. הוראה שמנסה לכסות את אלה בטלה.',
+  ex: 'מנכ״ל הסתיר ביודעין נתונים מהבורסה כדי להעלות את מחיר המניה, ונקנס. החברה לא יכולה לשפות אותו על הקנס.',
+  tip: 'שאלו: האם ההתנהגות הייתה בכוונה, בפזיזות או לשם רווח אישי? אם כן, אין כיסוי.',
+  rel: ['exemption', 'indemnification', 'insurance'] });
+
+/* ---------- פרק 4 ---------- */
+add('sh-good-faith', { term: 'חובת תום הלב של בעל מניה', sec: 'ס׳ 192',
+  sum: 'גם בעל מניה רגיל חייב לנהוג בהגינות בסיסית.',
+  plain: 'בעל מניה חייב לנהוג בתום לב ובדרך מקובלת כלפי החברה ובעלי המניות האחרים, ולא לנצל את כוחו לרעה. זה חשוב במיוחד כשהוא מצביע באסיפה על שינוי תקנון, הגדלת הון, מיזוג או עסקאות בעלי עניין. הוא גם צריך להימנע מקיפוח בעלי מניות אחרים.',
+  ex: 'בעל מניות עם 30% מצביע נגד הגדלת הון שהחברה צריכה כדי לשרוד, רק כדי לאלץ את האחרים לקנות ממנו מניות במחיר מופרז. זה ניצול כוח לרעה.',
+  tip: 'על הפרה חלים דיני החוזים. בדקו גם אם הוא ״בעל כוח מכריע״, כי אז חלה עליו חובה חמורה יותר.',
+  rel: ['fairness', 'controlling', 'oppression'] });
+add('controlling', { term: 'בעל שליטה', sec: 'ס׳ 1, 268',
+  sum: 'מי שיכול לכוון את פעילות החברה.',
+  plain: 'בעל שליטה הוא מי שיכול לכוון את פעילות החברה, בדרך כלל מי שמחזיק ביותר ממחצית זכויות ההצבעה או יכול למנות את רוב הדירקטורים. לעניין עסקאות עם בעלי עניין בחברה ציבורית, ההגדרה רחבה יותר: גם מי שמחזיק 25% או יותר, אם אין אדם אחר שמחזיק ביותר מ-50%.',
+  ex: 'בחברה ציבורית, לאורית יש 28%, ושאר המניות מפוזרות בציבור. לעניין עסקאות עם בעלי עניין, אורית היא בעלת שליטה, אף שאין לה רוב.',
+  tip: 'רוב הכללים המחמירים בחוק מופעלים כשיש ״בעל שליטה״. תמיד קבעו קודם אם יש כזה.',
+  rel: ['fairness', 'special-majority', 'approvals'] });
+add('fairness', { term: 'חובת הגינות', sec: 'ס׳ 193',
+  sum: 'בעל שליטה חייב יותר מתום לב: הוא חייב הגינות.',
+  plain: 'חובת הגינות כלפי החברה חלה על בעל שליטה, על מי שיודע שהקול שלו מכריע בהצבעה מסוימת, ועל מי שיש לו כוח למנות נושא משרה. זו דרישה גבוהה יותר מתום לב, כי הכוח שלהם גדול יותר. ההלכה התפתחה בע״א 817/79 קוסוי נ׳ בנק פויכטונגר.',
+  ex: 'בעל השליטה מעביר לחברה הפרטית שלו לקוחות של החברה הציבורית בתנאים טובים יותר. גם אם לא ״רימה״, הוא לא נהג בהגינות כלפי החברה.',
+  tip: 'גם בעל מניות קטן יכול להיות ״בעל כוח מכריע״ בהצבעה צמודה, ואז חלה עליו חובת הגינות.',
+  rel: ['controlling', 'sh-good-faith', 'control-sale'] });
+add('control-sale', { term: 'מכירת שליטה', sec: 'ע״א 2967/95 מגן וקשת',
+  sum: 'בעל השליטה רשאי למכור, אבל עליו להיזהר ממי הוא מוכר.',
+  plain: 'בעל שליטה יכול למכור את המניות שלו ולקבל ״פרמיית שליטה״, מחיר גבוה ממחיר המניה הרגיל, בלי לחלוק אותה עם המיעוט. אבל אם יש סימנים שהקונה מתכוון ״לבזוז״ את החברה, למשל לרוקן אותה מנכסים, המוכר צריך לבדוק ולא להתעלם. ההלכה נקבעה בע״א 2967/95 מגן וקשת נ׳ טמפו.',
+  ex: 'קונה מציע מחיר גבוה בהרבה מהשוק ומסרב להציג את מקורות המימון שלו. זה סימן אזהרה, ובעל השליטה צריך לבדוק לפני שהוא מוכר.',
+  tip: 'השאלה איננה אם מותר למכור, כי מותר, אלא אם המוכר התעלם מסימני אזהרה.',
+  rel: ['fairness', 'controlling', 'special-tender'] });
+
+/* ---------- פרק 5 ---------- */
+add('personal-interest', { term: 'עניין אישי', sec: 'ס׳ 1, 269',
+  sum: 'אינטרס של אדם בעסקה, שונה מהאינטרס של כל בעלי המניות.',
+  plain: 'יש לך ״עניין אישי״ בעסקה כשאתה, קרוב משפחה שלך, או חברה שאתה שולט בה מרוויחים ממנה משהו שבעלי המניות האחרים לא מקבלים. מי שיש לו עניין אישי חייב לגלות אותו לחברה בלי דיחוי (ס׳ 269), ובדרך כלל אינו משתתף בדיון ובהצבעה.',
+  ex: 'החברה שוקלת לשכור את משרד עורכי הדין של אחיו של המנכ״ל. למנכ״ל יש עניין אישי בעסקה, דרך קרוב משפחה.',
+  tip: 'החזקה במניות של החברה עצמה אינה עניין אישי, כי כל בעלי המניות נהנים ממנה באותה מידה.',
+  rel: ['extraordinary', 'approvals', 'conflict'] });
+add('extraordinary', { term: 'עסקה חריגה', sec: 'ס׳ 1',
+  sum: 'עסקה שאינה בשגרה, אינה בתנאי שוק, או שהיא מהותית.',
+  plain: 'עסקה היא ״חריגה״ אם מתקיים בה לפחות אחד משלושה: היא לא במהלך העסקים הרגיל של החברה; היא לא בתנאי שוק; או שהיא עשויה להשפיע באופן מהותי על הרווחיות, הנכסים או ההתחייבויות של החברה. עסקה חריגה עם בעל עניין דורשת אישורים מחמירים.',
+  ex: 'חברת מזון קונה מבעל השליטה בניין משרדים. זה לא במהלך העסקים הרגיל שלה, ולכן העסקה חריגה. לעומת זאת, קנייה שוטפת של קמח מספק בתנאי שוק אינה חריגה.',
+  tip: 'מספיק אחד משלושת המבחנים כדי שהעסקה תהיה חריגה.',
+  rel: ['personal-interest', 'approvals', 'special-majority'] });
+add('approvals', { term: 'מסלולי אישור', sec: 'ס׳ 270–275',
+  sum: 'מי צריך לאשר עסקה עם בעל עניין, לפי סוג העסקה.',
+  plain: 'ככל שהסיכון לחברה גבוה יותר, נדרשים יותר אורגנים. עסקה רגילה של נושא משרה מאושרת בדירקטוריון. עסקה חריגה עוברת קודם בוועדת הביקורת. תנאי כהונה עוברים בוועדת התגמול. עסקה חריגה עם בעל שליטה צריכה גם את האסיפה, ברוב מיוחד. הטבלה בפרק 5 מציגה את כל המסלולים.',
+  ex: 'חברה ציבורית רוצה לשכור מבנה מבעל השליטה ל-10 שנים. המסלול: ועדת ביקורת, אחריה דירקטוריון, ואחריהם אסיפה ברוב מיוחד.',
+  tip: 'סדר הבדיקה: האם יש עניין אישי? האם העסקה חריגה? מי בעל העניין? רק אז בוחרים שורה בטבלה.',
+  rel: ['special-majority', 'extraordinary', 'audit-committee', 'comp-committee'] });
+add('special-majority', { term: 'רוב מיוחד', sec: 'ס׳ 275',
+  sum: 'הצבעה שבה המיעוט שאין לו עניין אישי מקבל משקל מכריע.',
+  plain: 'כשמאשרים עסקה עם בעל שליטה, לא סופרים את בעל השליטה כדי לקבוע אם יש רוב ״נקי״. העסקה מאושרת אם מתקיימת אחת משתי חלופות. (א) בין המצביעים שאין להם עניין אישי יש רוב בעד (הנמנעים לא נספרים). (ב) סך המתנגדים מבין מי שאין להם עניין אישי הוא לכל היותר 2% מכלל זכויות ההצבעה בחברה.',
+  ex: 'לבעל השליטה 60%. מהציבור הצביעו 30%: 18% בעד ו-12% נגד. בין מי שאין להם עניין אישי יש רוב בעד, ולכן העסקה אושרה. אילו היו 12% בעד ו-18% נגד, חלופה א הייתה נכשלת, וגם חלופה ב (18% מתנגדים, יותר מ-2%). העסקה לא הייתה מאושרת.',
+  tip: 'נסו את המחשבון בפרק 5. זה חישוב שחוזר בשאלות אמריקאיות.',
+  rel: ['controlling', 'approvals', 'invalid-transaction'] });
+add('invalid-transaction', { term: 'עסקה שלא אושרה כדין', sec: 'ס׳ 280',
+  sum: 'עסקה שלא עברה את מסלול האישור אינה תקפה.',
+  plain: 'אם עסקה עם בעל עניין לא אושרה לפי הכללים, היא לא תקפה כלפי החברה, וגם לא כלפי נושא המשרה או בעל השליטה שמעורבים בה. כך החוק מוודא שאי אפשר ״לדלג״ על האישורים.',
+  ex: 'המנכ״ל חתם על הסכם ייעוץ עם חברה של בעל השליטה, בלי להביא אותו לוועדת הביקורת ולאסיפה. ההסכם אינו תקף כלפי החברה.',
+  tip: 'בדקו בנוסח העדכני של ס׳ 280 מה מעמדו של צד שלישי שפעל בתום לב.',
+  rel: ['approvals', 'special-majority'] });
+
+/* ---------- פרק 6 ---------- */
+add('oppression', { term: 'קיפוח', sec: 'ס׳ 191',
+  sum: 'תרופה לבעל מניה שנפגע ישירות מהדרך שבה מנהלים את החברה.',
+  plain: 'אם ענייני החברה מתנהלים בדרך שמקפחת בעל מניה, כלומר מפלה אותו, פוגעת בזכויות שלו או בציפיות הסבירות שלו, הוא יכול לפנות לבית המשפט בשמו. לבית המשפט סמכות רחבה: לבטל החלטה, לחייב פיצוי, ואפילו להורות לאחרים לקנות את המניות שלו במחיר הוגן.',
+  ex: 'שלושה חברים הקימו חברה. כל אחד מחזיק שליש ומכהן כמנהל. שניים מהם מסלקים את השלישי מהניהול, מפסיקים לשלם לו, ומשלמים לעצמם ״דמי ניהול״ במקום לחלק דיבידנד. השלישי יכול להגיש תביעת קיפוח.',
+  tip: 'בחברה פרטית קטנה, בתי המשפט מכירים בציפיות סבירות, למשל ציפייה להשתתף בניהול.',
+  rel: ['derivative', 'sh-good-faith'] });
+add('derivative', { term: 'תביעה נגזרת', sec: 'ס׳ 194–206',
+  sum: 'בעל מניה תובע בשם החברה, על נזק שנגרם לחברה.',
+  plain: 'כשנגרם נזק לחברה, למשל כי נושא משרה גנב ממנה או ניצל הזדמנות שלה, מי שאמורה לתבוע היא החברה. אבל לפעמים מי ששולט בחברה הוא בדיוק מי שגרם לנזק. לכן בעל מניה או דירקטור יכולים לתבוע בשם החברה. קודם הם פונים לחברה, ואחר כך מבקשים מבית המשפט לאשר את התביעה. בית המשפט מאשר אם התביעה הוגשה בתום לב ולכאורה היא לטובת החברה (ס׳ 198). הכסף שנפסק הולך לחברה.',
+  ex: 'המנכ״ל, שהוא גם בעל השליטה, העביר חוזים של החברה לחברה פרטית שלו. הדירקטוריון, שהוא מינה, לא תובע. בעל מניות מיעוט פונה לחברה, ואחר כך מגיש בקשה לאשר תביעה נגזרת.',
+  tip: 'המבחן: מי נפגע ישירות? אם החברה, תביעה נגזרת. אם בעל המניה עצמו, קיפוח.',
+  rel: ['demand', 'oppression', 'opportunity'] });
+add('demand', { term: 'פנייה מוקדמת', sec: 'ס׳ 194',
+  sum: 'לפני תביעה נגזרת מבקשים מהחברה לתבוע בעצמה.',
+  plain: 'לפני שבעל המניה מגיש בקשה לאשר תביעה נגזרת, הוא פונה לחברה בכתב ודורש שתתבע בעצמה. אם החברה סירבה, או לא ענתה בזמן שנקבע, אפשר להמשיך לבית המשפט. במקרים מיוחדים אפשר לוותר על הפנייה, למשל כשהיא תגרום לחברה נזק שאי אפשר לתקן.',
+  ex: 'בעל מניות שולח לחברה מכתב: ״תבעו את המנכ״ל על ניצול הזדמנות עסקית״. החברה לא עונה. כשחולף הזמן שנקבע בחוק, הוא מגיש בקשה לאשר תביעה נגזרת.',
+  tip: 'שאלות אמריקאיות אוהבות את השלב הזה. הסדר: פנייה לחברה, אחר כך סירוב או שתיקה, ורק אז בקשת אישור.',
+  rel: ['derivative'] });
+
+/* ---------- פרק 7 ---------- */
+add('distribution', { term: 'חלוקה', sec: 'ס׳ 1, 307',
+  sum: 'העברת כסף או נכס מהחברה לבעלי המניות, בגלל היותם בעלי מניות.',
+  plain: '״חלוקה״ היא לא רק דיבידנד. גם כשהחברה קונה בחזרה את המניות שלה מבעלי המניות (רכישה עצמית), זו חלוקה. כל חלוקה חייבת לעמוד בשני המבחנים של ס׳ 302. ההחלטה עליה מתקבלת בדירקטוריון (ס׳ 307).',
+  ex: 'החברה קונה בבורסה מניות של עצמה ב-10 מיליון ₪. זה בדיוק כמו לחלק 10 מיליון ₪ דיבידנד, וחלים אותם מבחנים.',
+  tip: 'כשבשאלה מופיעה ״רכישה עצמית״, עברו למבחני החלוקה.',
+  rel: ['profit-test', 'solvency-test', 'prohibited-distribution'] });
+add('profit-test', { term: 'מבחן הרווח', sec: 'ס׳ 302',
+  sum: 'מחלקים רק מתוך רווחים.',
+  plain: 'החברה יכולה לחלק רק מתוך ״רווח״: העודפים שלה (רווחים שנצברו ולא חולקו), או הרווחים שנצברו בשנתיים האחרונות, לפי הגבוה מביניהם. הבדיקה נעשית לפי הדוחות הכספיים האחרונים.',
+  ex: 'לחברה יש הפסדים צבורים של 5 מיליון ₪, אבל בשנתיים האחרונות היא הרוויחה 8 מיליון ₪. היא עומדת במבחן הרווח עד 8 מיליון ₪, כי לוקחים את הגבוה מבין השניים.',
+  tip: 'גם אם המבחן הזה לא מתקיים, בית המשפט יכול לאשר חלוקה (ס׳ 303).',
+  rel: ['solvency-test', 'court-distribution', 'distribution'] });
+add('solvency-test', { term: 'מבחן יכולת הפירעון', sec: 'ס׳ 302',
+  sum: 'אסור לחלק אם יש חשש סביר שהחברה לא תוכל לשלם את חובותיה.',
+  plain: 'גם כשיש רווחים, אסור לחלק אם יש חשש סביר שהחלוקה תמנע מהחברה לעמוד בחובות הקיימים והצפויים שלה, במועד שבו צריך לפרוע אותם. זה הקו האדום: אפילו בית המשפט לא יכול לפטור ממנו.',
+  ex: 'לחברה יש רווחים צבורים גדולים, אבל בעוד חודשיים היא צריכה לפרוע הלוואה של 20 מיליון ₪, ויש לה רק 22 מיליון ₪ במזומן. חלוקה של 10 מיליון ₪ תסכן את הפירעון, ולכן אסור לחלק.',
+  tip: 'המבחן צופה פני עתיד. הוא בודק תזרים וחובות צפויים, לא רק את המאזן.',
+  rel: ['profit-test', 'prohibited-distribution'] });
+add('court-distribution', { term: 'חלוקה באישור בית משפט', sec: 'ס׳ 303',
+  sum: 'בית המשפט יכול לאשר חלוקה בלי מבחן הרווח, אבל לא בלי יכולת פירעון.',
+  plain: 'חברה שאין לה רווחים, אבל מצבה הכספי יציב, יכולה לבקש מבית המשפט לאשר חלוקה. בית המשפט יאשר אם שוכנע שאין חשש סביר שהחלוקה תמנע מהחברה לפרוע את חובותיה. הנושים מקבלים הודעה ויכולים להתנגד. בדרך הזו נעשית בדרך כלל ״הפחתת הון״.',
+  ex: 'חברה מכרה נכס גדול ויש לה הרבה מזומנים, אבל ההפסדים מהעבר עדיין רשומים בספרים. היא פונה לבית המשפט כדי לחלק לבעלי המניות חלק מהמזומנים.',
+  tip: 'ס׳ 303 פוטר רק ממבחן הרווח. מבחן יכולת הפירעון נשאר תמיד.',
+  rel: ['profit-test', 'solvency-test'] });
+add('prohibited-distribution', { term: 'חלוקה אסורה', sec: 'ס׳ 310–311',
+  sum: 'חלוקה שלא עמדה במבחנים: את הכסף צריך להחזיר.',
+  plain: 'אם החברה חילקה בניגוד למבחנים, בעל מניה שקיבל את הכסף צריך להחזיר אותו, אלא אם לא ידע ולא היה עליו לדעת שהחלוקה אסורה. הדירקטורים שאישרו את החלוקה עלולים לשאת באחריות כלפי החברה, ואי אפשר לפטור אותם מראש מהאחריות הזו.',
+  ex: 'הדירקטוריון חילק דיבידנד חודש לפני שהחברה קרסה, כשכבר ידע על חוב ענק. בעל השליטה, שישב בדירקטוריון וקיבל את רוב הדיבידנד, יצטרך להחזיר אותו.',
+  tip: 'חלוקה אסורה ופטור הם מלכודת קלאסית: הפטור לא חל על החלטה על חלוקה.',
+  rel: ['distribution', 'exemption'] });
+add('merger', { term: 'מיזוג', sec: 'ס׳ 314–327',
+  sum: 'שתי חברות הופכות לאחת: החברה הקולטת נכנסת בנעלי חברת היעד.',
+  plain: 'במיזוג, כל הנכסים והחובות של חברת היעד עוברים לחברה הקולטת, וחברת היעד נמחקת בלי פירוק. נדרש אישור של הדירקטוריון ושל האסיפה בכל אחת מהחברות. באסיפה של חברת היעד, הקולות של החברה הקולטת ושל מי ששולט בה לא נספרים כרגיל. נושה שחושש שלא ייפרע יכול לבקש מבית המשפט לעצור את המיזוג. המיזוג נרשם רק אחרי שעברו 50 ימים מהגשת ההצעה לרשם ו-30 ימים מאישור האסיפות.',
+  ex: 'חברה א׳ מחזיקה 40% מחברה ב׳ ורוצה למזג אותה לתוכה. באסיפה של חברה ב׳, הקולות של חברה א׳ לא ייכללו בקביעה אם ההחלטה התקבלה.',
+  tip: 'בשאלות מיזוג חפשו שלושה דברים: מי מחזיק במי, מי חושש שלא ייפרע, וכמה זמן עבר.',
+  rel: ['full-tender', 'special-tender'] });
+add('special-tender', { term: 'הצעת רכש מיוחדת', sec: 'ס׳ 328',
+  sum: 'מי שעומד להגיע ל-25%, או ליותר מ-45%, בחברה ציבורית צריך לפנות לכולם.',
+  plain: 'בחברה ציבורית אי אפשר ״לזחול״ לשליטה בשקט. רכישה שבעקבותיה אדם יחזיק 25% מזכויות ההצבעה (כשאין מחזיק אחר עם 25%), או יותר מ-45% (כשאין מחזיק אחר עם יותר מ-45%), מותרת רק בהצעת רכש מיוחדת לכל בעלי המניות. כך הציבור מחליט אם להעביר את השליטה, וכולם יכולים ליהנות מהפרמיה.',
+  ex: 'לקרן יש 20% מחברה ציבורית, ואין מחזיק אחר עם 25%. היא רוצה לקנות עוד 6% מבעל מניות אחד. אחרי הרכישה יהיו לה 26%, ולכן היא חייבת להציע לכל בעלי המניות בהצעת רכש מיוחדת.',
+  tip: 'תמיד חשבו כמה יחזיק הרוכש אחרי הרכישה, והאם יש מחזיק אחר מעל הסף.',
+  rel: ['full-tender', 'control-sale'] });
+add('full-tender', { term: 'הצעת רכש מלאה', sec: 'ס׳ 336–341',
+  sum: 'מי שרוצה להחזיק יותר מ-90% צריך להציע לקנות את כל המניות.',
+  plain: 'אי אפשר להחזיק יותר מ-90% מחברה ציבורית ולהשאיר ״זנב״ קטן של ציבור. מי שרוצה לעבור את הסף צריך להציע לקנות את כל המניות. אם בסוף ההצעה נשארו פחות מ-5% שלא נענו, ורוב הניצעים שאין להם עניין אישי קיבלו את ההצעה, או שנשארו פחות מ-2%, כל המניות עוברות לרוכש, גם של מי שסירב. מי שחושב שהמחיר נמוך יכול לבקש מבית המשפט לקבוע תמורה הוגנת (זכות הערכה).',
+  ex: 'בעל השליטה מחזיק 85% ומציע לקנות את כל השאר. 12% מתוך ה-15% נענים, ונשארים 3%. זה פחות מ-5%, ורוב הניצעים שאין להם עניין אישי קיבלו את ההצעה. לכן המניות של ה-3% הנותרים עוברות אליו בכפייה.',
+  tip: 'הספים: 90% כדי שתחול החובה; פחות מ-5% יחד עם רוב בלי עניין אישי, או פחות מ-2%, כדי להשלים את הרכישה. הספים תוקנו בעבר, לכן ודאו את הנוסח העדכני.',
+  rel: ['special-tender', 'merger'] });
+
+/* ---------- index helpers ---------- */
+const ORDER = [];
+CHAPTERS.forEach(ch => ch.concepts.forEach(id => { ORDER.push(id); C[id].ch = ch.id; }));
+const CH = Object.fromEntries(CHAPTERS.map(ch => [ch.id, ch]));
+
+let learned = new Set();
+try { learned = new Set(JSON.parse(localStorage.getItem('companies-law-learned') || '[]')); } catch (e) {}
+function saveLearned() { try { localStorage.setItem('companies-law-learned', JSON.stringify([...learned])); } catch (e) {} }
+
+const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+const terms = s => s.replace(/\{\{([\w-]+)\|([^}]+)\}\}/g, (m, id, label) => C[id] ? `<button type="button" class="term" data-c="${id}">${label}</button>` : label);
+
+/* ---------- tools ---------- */
+const route = steps => `<div class="route">${steps.map((s, i) => `${i ? '<span class="arrow" aria-hidden="true">←</span>' : ''}<span class="step${/אסיפה/.test(s) ? ' strong' : ''}">${s}</span>`).join('')}</div>`;
+
+const TOOLS = {
+  organs: () => `
+    <section class="tool" aria-labelledby="t-organs">
+      <div class="tool-head"><p class="eyebrow">מי מוסמך?</p><h3 id="t-organs">חלוקת הסמכויות בקצרה</h3><p class="lede">לחצו על שם האורגן כדי לקרוא עליו.</p></div>
+      <div class="compare">
+        <div class="side"><h4>{{general-meeting|האסיפה הכללית}}</h4><dl><dt>תפקיד</dt><dd>ההחלטות היסודיות</dd><dt>דוגמאות</dt><dd>שינוי תקנון, מינוי דירקטורים, מיזוג, עסקאות עם בעל שליטה</dd></dl></div>
+        <div class="side"><h4>{{board|הדירקטוריון}}</h4><dl><dt>תפקיד</dt><dd>מדיניות ופיקוח</dd><dt>דוגמאות</dt><dd>תוכניות פעולה, מינוי המנכ״ל, דוחות כספיים, החלטה על חלוקה</dd></dl></div>
+        <div class="side"><h4>{{ceo|המנכ״ל}}</h4><dl><dt>תפקיד</dt><dd>ניהול שוטף</dd><dt>דוגמאות</dt><dd>עובדים, ספקים, מבצעים; כל סמכות ניהול שלא ניתנה לאחר</dd></dl></div>
+      </div>
+    </section>`,
+  duties: () => `
+    <section class="tool" aria-labelledby="t-duties">
+      <div class="tool-head"><p class="eyebrow">ההבחנה המרכזית</p><h3 id="t-duties">זהירות מול אמונים</h3><p class="lede">כמעט כל שאלה על נושאי משרה מתחילה בשאלה איזו מהחובות הופרה.</p></div>
+      <div class="table-scroll"><table>
+        <thead><tr><th>נקודת השוואה</th><th>חובת זהירות</th><th>חובת אמונים</th></tr></thead>
+        <tbody>
+          <tr><td><b>השאלה</b></td><td>איך החלטת?</td><td>בשביל מי החלטת?</td></tr>
+          <tr><td><b>סעיף</b></td><td>{{care|ס׳ 252}}</td><td>{{loyalty|ס׳ 254}}</td></tr>
+          <tr><td><b>דוגמה</b></td><td>אישור עסקה בלי לקרוא את החומר</td><td>עסקה עם חברה של בן הזוג</td></tr>
+          <tr><td><b>דין ההפרה</b></td><td>נזיקין (רשלנות)</td><td>חוזים, והשבת הרווח</td></tr>
+          <tr><td><b>{{bjr|שיקול הדעת העסקי}}</b></td><td>מגן, אם התקיימו תנאי הסף</td><td>לא מגן</td></tr>
+          <tr><td><b>{{exemption|פטור}}</b></td><td>אפשרי, אם התקנון מתיר (לא בחלוקה)</td><td>אסור</td></tr>
+          <tr><td><b>{{insurance|ביטוח}}</b></td><td>אפשרי</td><td>רק בתום לב ובבסיס סביר</td></tr>
+        </tbody>
+      </table></div>
+    </section>`,
+  approvals: () => `
+    <section class="tool" aria-labelledby="t-appr">
+      <div class="tool-head"><p class="eyebrow">חברה ציבורית · ס׳ 270–275</p><h3 id="t-appr">טבלת מסלולי האישור</h3><p class="lede">השורות המודגשות דורשות גם את האסיפה, ברוב מיוחד.</p></div>
+      <div class="table-scroll"><table>
+        <thead><tr><th>סוג העסקה</th><th>סעיף</th><th>מסלול האישור</th></tr></thead>
+        <tbody>
+          <tr><td>עסקה לא חריגה, עם {{personal-interest|עניין אישי}} של נושא משרה</td><td class="num">271</td><td>${route(['דירקטוריון'])}</td></tr>
+          <tr><td>{{extraordinary|עסקה חריגה}}, עם עניין אישי של נושא משרה</td><td class="num">272</td><td>${route(['ועדת ביקורת', 'דירקטוריון'])}</td></tr>
+          <tr><td>תנאי כהונה של נושא משרה שאינו דירקטור</td><td class="num">272</td><td>${route(['ועדת תגמול', 'דירקטוריון'])}</td></tr>
+          <tr class="hot"><td>תנאי כהונה של המנכ״ל</td><td class="num">272</td><td>${route(['ועדת תגמול', 'דירקטוריון', 'אסיפה ברוב מיוחד'])}</td></tr>
+          <tr><td>תנאי כהונה של דירקטור</td><td class="num">273</td><td>${route(['ועדת תגמול', 'דירקטוריון', 'אסיפה'])}</td></tr>
+          <tr class="hot"><td>עסקה חריגה עם {{controlling|בעל שליטה}}, או שיש לו בה עניין אישי</td><td class="num">275</td><td>${route(['ועדת ביקורת', 'דירקטוריון', 'אסיפה ברוב מיוחד'])}</td></tr>
+          <tr class="hot"><td>תנאי כהונה של בעל שליטה או של קרובו</td><td class="num">275</td><td>${route(['ועדת תגמול', 'דירקטוריון', 'אסיפה ברוב מיוחד'])}</td></tr>
+        </tbody>
+      </table></div>
+      <p class="lede">כשלרוב חברי הדירקטוריון יש עניין אישי, נדרש גם אישור האסיפה. בחברה פרטית חלק מהמסלולים מקלים יותר, ויש הקלות גם בתקנות.</p>
+    </section>
+    <section class="tool" aria-labelledby="t-calc">
+      <div class="tool-head"><p class="eyebrow">ס׳ 275 · נסו בעצמכם</p><h3 id="t-calc">מחשבון {{special-majority|רוב מיוחד}}</h3><p class="lede">הזינו אחוזים מכלל זכויות ההצבעה בחברה. המחשבון מניח שבעלי העניין האישי מצביעים בעד.</p></div>
+      <div class="calc">
+        <div class="field"><label for="c-int">בעלי עניין אישי, בעד</label><div class="inp"><input id="c-int-r" type="range" min="0" max="100" value="60" aria-label="בעלי עניין אישי בעד"><input id="c-int" type="number" min="0" max="100" value="60"></div></div>
+        <div class="field"><label for="c-for">ללא עניין אישי, בעד</label><div class="inp"><input id="c-for-r" type="range" min="0" max="100" value="18" aria-label="ללא עניין אישי בעד"><input id="c-for" type="number" min="0" max="100" value="18"></div></div>
+        <div class="field"><label for="c-ag">ללא עניין אישי, נגד</label><div class="inp"><input id="c-ag-r" type="range" min="0" max="100" value="12" aria-label="ללא עניין אישי נגד"><input id="c-ag" type="number" min="0" max="100" value="12"></div></div>
+      </div>
+      <div class="checks" id="calc-checks" aria-live="polite"></div>
+      <div id="calc-verdict"></div>
+    </section>`,
+  remedies: () => `
+    <section class="tool" aria-labelledby="t-rem">
+      <div class="tool-head"><p class="eyebrow">מי נפגע מכריע</p><h3 id="t-rem">קיפוח מול תביעה נגזרת</h3></div>
+      <div class="table-scroll"><table>
+        <thead><tr><th>נקודת השוואה</th><th>{{oppression|קיפוח}} · ס׳ 191</th><th>{{derivative|תביעה נגזרת}} · ס׳ 194–206</th></tr></thead>
+        <tbody>
+          <tr><td><b>מי נפגע</b></td><td>בעל המניה עצמו, בזכויות או בציפיות הסבירות שלו</td><td>החברה; בעל המניה נפגע רק בעקיפין</td></tr>
+          <tr><td><b>מי תובע</b></td><td>בעל המניה, בשמו</td><td>בעל מניה או דירקטור, בשם החברה</td></tr>
+          <tr><td><b>שלב מקדמי</b></td><td>אין, תביעה ישירה</td><td>{{demand|פנייה מוקדמת}}, ואחריה בקשה לאישור</td></tr>
+          <tr><td><b>המבחן</b></td><td>יחס מפלה או פגיעה בציפיות סבירות</td><td>תום לב, ולכאורה לטובת החברה (ס׳ 198)</td></tr>
+          <tr><td><b>הסעד</b></td><td>רחב: כל הוראה להסרת הקיפוח, כולל רכישת מניות</td><td>הסעד לחברה; גמול והוצאות לתובע</td></tr>
+        </tbody>
+      </table></div>
+    </section>`,
+  distribution: () => `
+    <section class="tool" aria-labelledby="t-dist">
+      <div class="tool-head"><p class="eyebrow">ס׳ 302–303 · נסו בעצמכם</p><h3 id="t-dist">האם מותר לחלק?</h3><p class="lede">ענו על שתי השאלות כדי לראות מה הדין.</p></div>
+      <div class="q-row"><span>יש עודפים, או רווחים בשנתיים האחרונות, בגובה החלוקה? ({{profit-test|מבחן הרווח}})</span>
+        <div class="seg" data-q="profit"><button type="button" data-v="yes" aria-pressed="true">כן</button><button type="button" data-v="no" aria-pressed="false">לא</button></div></div>
+      <div class="q-row"><span>יש חשש סביר שהחברה לא תעמוד בחובותיה בגלל החלוקה? ({{solvency-test|יכולת פירעון}})</span>
+        <div class="seg" data-q="solv"><button type="button" data-v="no" aria-pressed="true">אין חשש</button><button type="button" data-v="yes" aria-pressed="false">יש חשש</button></div></div>
+      <div id="dist-verdict" aria-live="polite"></div>
+    </section>`,
+  review: () => `
+    <section class="tool" aria-labelledby="t-method">
+      <div class="tool-head"><p class="eyebrow">שיטה</p><h3 id="t-method">חמישה צעדים לכל שאלה</h3></div>
+      <div class="steps">
+        <div class="stepcard"><b>1</b><h4>סווגו את החברה</h4><p>פרטית או {{public-company|ציבורית}}? חברת אג״ח? הכללים משתנים בהתאם.</p></div>
+        <div class="stepcard"><b>2</b><h4>זהו את השחקנים</h4><p>{{officer|נושא משרה}}, {{controlling|בעל שליטה}}, בעל {{personal-interest|עניין אישי}}, נושה.</p></div>
+        <div class="stepcard"><b>3</b><h4>אתרו את האורגן</h4><p>מי היה מוסמך להחליט, ובאיזה {{approvals|מסלול}} ורוב?</p></div>
+        <div class="stepcard"><b>4</b><h4>בחנו את החובה</h4><p>{{care|זהירות}}, {{loyalty|אמונים}}, {{sh-good-faith|תום לב}} או {{fairness|הגינות}}.</p></div>
+        <div class="stepcard"><b>5</b><h4>התאימו תרופה</h4><p>{{invalid-transaction|בטלות}}, השבה, {{oppression|קיפוח}}, {{derivative|תביעה נגזרת}}, {{veil|הרמת מסך}}.</p></div>
+      </div>
+    </section>
+    <section class="tool" aria-labelledby="t-traps">
+      <div class="tool-head"><p class="eyebrow">מלכודות</p><h3 id="t-traps">שש טעויות שחוזרות בבחינה</h3><p class="lede">המסיחים בשאלות האמריקאיות בנויים על הטעויות האלה. כשתי תשובות נראות נכונות, חפשו את התנאי המצטבר שחסר באחת מהן.</p></div>
+      <div class="traps">
+        <div class="trap"><p class="wrong">טעות: לחברה בעל מניות יחיד, ולכן מרימים מסך.</p><p class="right">נכון: נדרשים שימוש לרעה, מודעות, ושיהיה צודק ונכון. ראו {{veil|הרמת מסך}}.</p></div>
+        <div class="trap"><p class="wrong">טעות: פטור מראש חל גם על הפרת אמונים.</p><p class="right">נכון: {{exemption|פטור}} רק מחובת הזהירות, ולא בהחלטה על חלוקה.</p></div>
+        <div class="trap"><p class="wrong">טעות: שיקול הדעת העסקי מגן גם בעסקה עם בעל שליטה.</p><p class="right">נכון: ניגוד עניינים מוציא את ההחלטה מ{{bjr|הכלל}}, ובודקים את הגינות העסקה.</p></div>
+        <div class="trap"><p class="wrong">טעות: יש רווחים, ולכן אפשר לחלק.</p><p class="right">נכון: שני מבחנים מצטברים, ו{{court-distribution|בית המשפט}} פוטר רק ממבחן הרווח.</p></div>
+        <div class="trap"><p class="wrong">טעות: רוב רגיל מספיק לעסקה חריגה עם בעל שליטה.</p><p class="right">נכון: נדרש {{special-majority|רוב מיוחד}}: רוב בקרב מי שאין להם עניין אישי, או מתנגדים עד 2%.</p></div>
+        <div class="trap"><p class="wrong">טעות: בעל מניה תובע בשמו על נזק שנגרם לחברה.</p><p class="right">נכון: על נזק לחברה מגישים {{derivative|תביעה נגזרת}}, אחרי פנייה מוקדמת ובאישור בית המשפט.</p></div>
+      </div>
+    </section>`
+};
+
+/* ---------- render ---------- */
+function render() {
+  document.getElementById('rail').innerHTML = CHAPTERS.map((ch, i) => `<a href="#${ch.id}" data-ch="${ch.id}"><span>${i + 1}</span>${ch.title}</a>`).join('');
+  document.getElementById('chapters').innerHTML = CHAPTERS.map((ch, i) => `
+    <section class="chapter" id="${ch.id}" aria-labelledby="${ch.id}-h">
+      <div class="ch-head">
+        <p class="eyebrow">${ch.eyebrow}</p>
+        <div class="row"><h2 id="${ch.id}-h">${ch.title}</h2>${ch.concepts.length ? `<span class="ch-count" data-count="${ch.id}"></span>` : ''}</div>
+      </div>
+      <p class="intro">${terms(ch.intro)}</p>
+      ${ch.concepts.length ? `<div class="grid">${ch.concepts.map(id => card(id)).join('')}</div>` : ''}
+      ${ch.tool ? terms(TOOLS[ch.tool]()) : ''}
+      ${ch.quiz ? `<details class="quiz"><summary><span class="eyebrow">בדקו את עצמכם</span><span class="q">${ch.quiz.q}</span><span class="reveal">הציגו תשובה</span></summary><p class="a">${terms(ch.quiz.a)}</p></details>` : ''}
+    </section>`).join('');
+  updateProgress();
+  initCalc();
+  initDist();
+}
+function card(id) {
+  const c = C[id];
+  return `<button type="button" class="card" data-c="${id}" aria-label="${c.term}: ${c.sum}">
+    <span class="ct">${c.term}</span><span class="cs">${c.sum}</span>
+    <span class="foot"><span class="sec">${c.sec}</span><span class="done-mark" data-done="${id}">${learned.has(id) ? 'נלמד ✓' : ''}</span></span>
+  </button>`;
+}
+function updateProgress() {
+  const n = ORDER.filter(id => learned.has(id)).length;
+  document.getElementById('bar').style.width = `${(n / ORDER.length) * 100}%`;
+  document.getElementById('progress-text').textContent = `למדתם ${n} מתוך ${ORDER.length} מושגים`;
+  CHAPTERS.forEach(ch => {
+    const el = document.querySelector(`[data-count="${ch.id}"]`);
+    if (el) el.textContent = `${ch.concepts.filter(id => learned.has(id)).length}/${ch.concepts.length} נלמדו`;
+  });
+  document.querySelectorAll('[data-done]').forEach(el => { el.textContent = learned.has(el.dataset.done) ? 'נלמד ✓' : ''; });
+}
+
+/* ---------- dialog ---------- */
+let openId = null, lastFocus = null;
+function openConcept(id) {
+  const c = C[id]; if (!c) return;
+  if (!openId) lastFocus = document.activeElement;
+  openId = id;
+  const i = ORDER.indexOf(id), prev = ORDER[i - 1], next = ORDER[i + 1];
+  const isOn = learned.has(id);
+  document.getElementById('modal-root').innerHTML = `
+    <div class="scrim" data-close>
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="d-title">
+        <div class="d-head">
+          <div class="d-top"><span class="d-chapter">${CH[c.ch].eyebrow}</span><button type="button" class="x" data-close aria-label="סגירה">×</button></div>
+          <h2 id="d-title">${c.term}</h2>
+          <p class="d-sum">${c.sum}</p>
+          <div><span class="sec">${c.sec}</span></div>
+        </div>
+        <div class="d-body">
+          <div class="blk"><h5>בשפה פשוטה</h5><p>${esc(c.plain)}</p></div>
+          <div class="blk example"><h5>דוגמה</h5><p>${esc(c.ex)}</p></div>
+          <div class="blk exam"><h5>בבחינה</h5><p>${esc(c.tip)}</p></div>
+          ${c.rel && c.rel.length ? `<div class="blk"><h5>מושגים קשורים</h5><div class="chips">${c.rel.filter(r => C[r]).map(r => `<button type="button" class="chip" data-c="${r}">${C[r].term}</button>`).join('')}</div></div>` : ''}
+          <a class="law-link" href="${LAW_URL}" target="_blank" rel="noopener">לנוסח החוק בנבו (${c.sec})</a>
+        </div>
+        <div class="d-foot">
+          <button type="button" class="btn learn" id="learn-btn" aria-pressed="${isOn}">${isOn ? 'נלמד ✓' : 'סמנו כנלמד'}</button>
+          <div class="nav-btns">
+            ${prev ? `<button type="button" class="btn" data-c="${prev}">→ ${C[prev].term}</button>` : ''}
+            ${next ? `<button type="button" class="btn" data-c="${next}">${C[next].term} ←</button>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  document.body.style.overflow = 'hidden';
+  const dlg = document.querySelector('.dialog');
+  dlg.scrollTop = 0;
+  dlg.querySelector('.x').focus();
+}
+function closeConcept() {
+  document.getElementById('modal-root').innerHTML = '';
+  document.body.style.overflow = '';
+  openId = null;
+  if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+}
+
+document.addEventListener('click', e => {
+  const learnBtn = e.target.closest('#learn-btn');
+  if (learnBtn && openId) {
+    learned.has(openId) ? learned.delete(openId) : learned.add(openId);
+    saveLearned(); updateProgress();
+    const on = learned.has(openId);
+    learnBtn.setAttribute('aria-pressed', on); learnBtn.textContent = on ? 'נלמד ✓' : 'סמנו כנלמד';
+    return;
+  }
+  const t = e.target.closest('[data-c]');
+  if (t) { e.preventDefault(); hideResults(); openConcept(t.dataset.c); return; }
+  if (e.target.matches('[data-close]') || e.target.closest('.x')) { closeConcept(); return; }
+  if (!e.target.closest('.search')) hideResults();
+});
+document.addEventListener('keydown', e => {
+  if (!openId) return;
+  if (e.key === 'Escape') { closeConcept(); return; }
+  if (e.key === 'Tab') {
+    const f = [...document.querySelectorAll('.dialog button, .dialog a')];
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+});
+
+/* ---------- search ---------- */
+const qEl = document.getElementById('q'), resEl = document.getElementById('results');
+let active = 0, hits = [];
+function hideResults() { resEl.hidden = true; }
+function norm(s) { return s.replace(/[״׳"'\-–]/g, '').toLowerCase(); }
+qEl.addEventListener('input', () => {
+  const q = norm(qEl.value.trim());
+  if (!q) { hideResults(); return; }
+  const scored = ORDER.map(id => {
+    const c = C[id]; const t = norm(c.term);
+    let s = t.startsWith(q) ? 3 : t.includes(q) ? 2 : (norm(c.sum + ' ' + c.plain + ' ' + c.sec).includes(q) ? 1 : 0);
+    return { id, s };
+  }).filter(x => x.s).sort((a, b) => b.s - a.s).slice(0, 8);
+  hits = scored.map(x => x.id); active = 0;
+  resEl.innerHTML = hits.length
+    ? hits.map((id, i) => `<button type="button" role="option" data-c="${id}" class="${i === 0 ? 'active' : ''}"><b>${C[id].term}</b><small>${C[id].sec} · ${C[id].sum}</small></button>`).join('')
+    : `<p style="padding:10px 12px;color:var(--muted)">לא נמצא מושג. נסו מילה אחרת, למשל ״דיבידנד״ או ״דירקטור״.</p>`;
+  resEl.hidden = false;
+});
+qEl.addEventListener('keydown', e => {
+  if (resEl.hidden || !hits.length) return;
+  const btns = [...resEl.querySelectorAll('button')];
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    active = (active + (e.key === 'ArrowDown' ? 1 : -1) + hits.length) % hits.length;
+    btns.forEach((b, i) => b.classList.toggle('active', i === active));
+  } else if (e.key === 'Enter') { e.preventDefault(); hideResults(); openConcept(hits[active]); }
+  else if (e.key === 'Escape') hideResults();
+});
+
+/* ---------- calculators ---------- */
+function initCalc() {
+  const pairs = [['c-int', 'c-int-r'], ['c-for', 'c-for-r'], ['c-ag', 'c-ag-r']];
+  pairs.forEach(([n, r]) => {
+    const ne = document.getElementById(n), re = document.getElementById(r);
+    if (!ne) return;
+    ne.addEventListener('input', () => { re.value = ne.value; calc(); });
+    re.addEventListener('input', () => { ne.value = re.value; calc(); });
+  });
+  calc();
+}
+function calc() {
+  const g = id => Math.max(0, Math.min(100, Number(document.getElementById(id).value) || 0));
+  const I = g('c-int'), F = g('c-for'), A = g('c-ag');
+  const box = document.getElementById('calc-checks'), v = document.getElementById('calc-verdict');
+  if (I + F + A > 100) {
+    box.innerHTML = '';
+    v.innerHTML = `<p class="verdict mid">סך האחוזים עולה על 100%. הקטינו אחד הערכים.</p>`;
+    return;
+  }
+  const overall = I + F > A, altA = F > A, altB = A <= 2, ok = overall && (altA || altB);
+  const row = (pass, label, detail) => `<div class="check"><span class="tag ${pass ? 'yes' : 'no'}">${pass ? 'מתקיים' : 'לא מתקיים'}</span><span><b>${label}</b><br>${detail}</span></div>`;
+  box.innerHTML =
+    row(overall, 'רוב רגיל בכלל ההצבעה', `בעד ${I + F}%, נגד ${A}%.`) +
+    row(altA, 'חלופה א: רוב בקרב מי שאין להם עניין אישי', `בעד ${F}%, נגד ${A}%. קולות בעלי העניין (${I}%) והנמנעים לא נספרים.`) +
+    row(altB, 'חלופה ב: מתנגדים עד 2%', `מתנגדים ללא עניין אישי: ${A}% מכלל זכויות ההצבעה.`);
+  v.innerHTML = `<p class="verdict ${ok ? 'yes' : 'no'}">${ok ? 'העסקה אושרה' : 'העסקה לא אושרה'}</p>`;
+}
+function initDist() {
+  const state = { profit: 'yes', solv: 'no' };
+  document.querySelectorAll('.seg').forEach(seg => seg.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    state[seg.dataset.q] = b.dataset.v;
+    seg.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    show();
+  }));
+  function show() {
+    const el = document.getElementById('dist-verdict');
+    if (state.solv === 'yes') el.innerHTML = `<p class="verdict no">אסור לחלק</p><p>${terms('יש חשש שהחברה לא תעמוד בחובותיה. זה הקו האדום, וגם בית המשפט לא יכול לאשר. חלוקה כזו היא {{prohibited-distribution|חלוקה אסורה}}.')}</p>`;
+    else if (state.profit === 'no') el.innerHTML = `<p class="verdict mid">רק באישור בית משפט</p><p>${terms('מבחן הרווח לא מתקיים, אבל אין חשש לפירעון. אפשר לבקש {{court-distribution|אישור בית משפט}} לפי ס׳ 303.')}</p>`;
+    else el.innerHTML = `<p class="verdict yes">מותר לחלק</p><p>${terms('שני המבחנים מתקיימים. ההחלטה מתקבלת ב{{board|דירקטוריון}}. זכרו: גם {{distribution|רכישה עצמית}} היא חלוקה.')}</p>`;
+  }
+  show();
+}
+
+/* ---------- chapter rail highlight ---------- */
+function initRail() {
+  const links = [...document.querySelectorAll('.rail a')];
+  if (!('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (en.isIntersecting) {
+        links.forEach(a => a.classList.toggle('on', a.dataset.ch === en.target.id));
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  document.querySelectorAll('.chapter').forEach(s => io.observe(s));
+}
+
+render();
+initRail();
+const h = (location.hash || '').slice(1);
+if (C[h]) openConcept(h);
+</script>
+
+</body>
+</html>
